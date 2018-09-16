@@ -1,12 +1,17 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
-# Test binary, build with `go test -c`
-*.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+*.dat
+*.log
+*.rdb
+.DS_Store
+.idea
+/build/
+/coverage/
+node_modules
+fronteng/node_modules
+vendor
+/.nyc_output/
+.circleci/lint-failed
+.circleci/test-failed
+.circleci/environment
+client/.wwp-cache
+certs
+.env

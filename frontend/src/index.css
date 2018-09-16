@@ -1,0 +1,78 @@
+
+ /**
+  * Local dependencies.
+  */
+ 
+ /* @import './ui/variables.css';
+ @import './ui/typography.css';
+ @import './ui/react-forms.css';
+ @import './ui/notifications.css'; */
+ 
+ html {
+   /* Fix the thick text rendering on OSX */
+   -moz-osx-font-smoothing: grayscale;
+   -webkit-font-smoothing: antialiased;
+   font-smoothing: antialiased;
+ }
+ 
+ /*
+ Make body at least as big as the viewport
+ (for vertically fluid layouts and full page click handlers)
+ */
+ html {
+   width: 100%;
+   height: 100%;
+ }
+ body {
+   min-width: 100%;
+   min-height: 100%;
+ }
+ 
+ [hidden] {
+   display: none;
+ }
+ 
+ #root {
+   min-width: 100%;
+   min-height: 100vh;
+ 
+   & > * {
+     width: 100%;
+   }
+ }
+ 
+ @keyframes fade-in {
+   0% {
+     /*opacity: 0;*/
+     transform: translateY(-20px) scale(0.95) translateZ(0);
+   }
+   100% {
+     transform: translateY(0) scale(1) translateZ(0);
+   }
+ }
+ 
+ @keyframes fade-child {
+   0% {
+     transform: translateY(0px) scale(0.985);
+   }
+   100% {
+     opacity: 1;
+     transform: translateY(0) scale(1);
+   }
+ }
+ 
+ .fade-in {
+   animation: fade-in 0.24s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+ 
+   & > * {
+     opacity: 0;
+     animation: fade-child 0.24s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+     animation-delay: 0.18s;
+   }
+ }
+ 
+ .fade-in-simple {
+   opacity: 0;
+   animation: fade-child 0.24s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+ }
+ 

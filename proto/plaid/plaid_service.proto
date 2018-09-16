@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package plaid;
+
+message ExchangeTokenRequest {
+  string token = 1;
+}
+
+message ExchangeTokenResponse {
+  string access_token = 1;
+  string item_id = 2;
+}
+
+// https://plaid.com/docs/api/#transactions
+message Transaction {
+  string id = 1;
+  string account_id = 2;
+  repeated string category = 3;
+  string category_id = 4;
+
+  enum Type {
+    UNRESOLVED = 0;
+    DIGITAL = 1;
+    PLACE = 2;
+    SPECIAL = 3;
+  }
+  Type type = 5;
+  string merchant_name = 6;
+  double amount = 7;
+
+  enum Currency {
+    USD = 0;
+    CAD = 1;
+  }
+  Currency currency_type = 8;
+
+  string date = 9;
+
+  message Location {
+    string address = 1;
+    string city = 2;
+    double lat = 3;
+    double lon = 4;
+    string state = 5;
+    string store_number = 6;
+    string zip = 7;
+  }
+  Location location = 10;
+
+  message PaymentMeta {
+    string by_order_of = 1;
+    string payee = 2;
+    string payer = 3;
+    string payment_method = 4;
+    string payment_processor = 5;
+    string ppdid = 6;
+    string reason = 7;
+    string reference_number = 8;
+  }
+  PaymentMeta payment_meta = 11;
+
+  bool pending = 12;
+  string pending_transaction_id = 13;
+}
+
+message GetTransactionsRequest {}
+
+message GetTransactionsResponse {
+  repeated Transaction transactions = 1;
+}
+
+service Plaid {
+  rpc ExchangeToken (ExchangeTokenRequest) returns (ExchangeTokenResponse);
+  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+}

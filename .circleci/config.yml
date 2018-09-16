@@ -1,0 +1,64 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/segmentio/{{ .Name }}
+
+    docker:
+      - image: segment/circleci-golang:1.9
+        environment:
+          ECR_ENABLED: True
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: deps-{{ `{{ checksum "Gopkg.lock" }}` }}
+
+      - run:
+          name: Configure netrc
+          command: |
+            echo "machine github.com login $GH_LOGIN" > ~/.netrc
+
+      - setup_remote_docker:
+          reusable: true
+
+      - run:
+          name: ECR Login
+          command: |
+            $(aws ecr get-login --no-include-email --region $AWS_REGION)
+
+      - run:
+          name: Dependencies
+          command: |
+            go get -u github.com/golang/dep/cmd/dep
+            make deps
+
+      - run:
+          name: Test
+          command: |
+            make test
+
+      - run:
+          name: Snyk Setup
+          command: curl -sL https://raw.githubusercontent.com/segmentio/snyk_helpers/master/initialization/snyk.sh | sh
+
+      - save_cache:
+          key: deps-{{ `{{ checksum "Gopkg.lock" }}` }}
+          paths:
+            - vendor/
+
+      - run:
+          name: Deployment
+          command: |
+            make release
+
+      - store_artifacts:
+          path: .run
+          destination: trebuchet
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          context: snyk
