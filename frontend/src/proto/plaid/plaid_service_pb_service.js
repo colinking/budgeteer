@@ -1,7 +1,7 @@
 // package: plaid
-// file: plaid/plaid_service.proto
+// file: proto/plaid/plaid_service.proto
 
-var plaid_plaid_service_pb = require("../plaid/plaid_service_pb");
+var proto_plaid_plaid_service_pb = require("../../proto/plaid/plaid_service_pb");
 var grpc = require("grpc-web-client").grpc;
 
 var Plaid = (function () {
@@ -15,8 +15,8 @@ Plaid.ExchangeToken = {
   service: Plaid,
   requestStream: false,
   responseStream: false,
-  requestType: plaid_plaid_service_pb.ExchangeTokenRequest,
-  responseType: plaid_plaid_service_pb.ExchangeTokenResponse
+  requestType: proto_plaid_plaid_service_pb.ExchangeTokenRequest,
+  responseType: proto_plaid_plaid_service_pb.ExchangeTokenResponse
 };
 
 Plaid.GetTransactions = {
@@ -24,8 +24,8 @@ Plaid.GetTransactions = {
   service: Plaid,
   requestStream: false,
   responseStream: false,
-  requestType: plaid_plaid_service_pb.GetTransactionsRequest,
-  responseType: plaid_plaid_service_pb.GetTransactionsResponse
+  requestType: proto_plaid_plaid_service_pb.GetTransactionsRequest,
+  responseType: proto_plaid_plaid_service_pb.GetTransactionsResponse
 };
 
 exports.Plaid = Plaid;

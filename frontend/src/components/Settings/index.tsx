@@ -29,14 +29,15 @@ export default class Settings extends React.Component<SettingsProps> {
     const req = new ExchangeTokenRequest();
     req.setToken(token);
     console.log(req);
-    const client = new PlaidClient(getHost());
-    client.exchangeToken(
+    new PlaidClient(getHost()).exchangeToken(
       req,
-      (error: ServiceError, responseMessage: ExchangeTokenResponse | null) => {
-        console.log('returned from request');
-        console.log(error);
-        console.log((responseMessage as ExchangeTokenResponse).getAccessToken());
-        console.log((responseMessage as ExchangeTokenResponse).getItemId());
+      (error: ServiceError | null, responseMessage: ExchangeTokenResponse | null) => {
+        if (error) {
+          throw error
+        }
+        const resp = responseMessage as ExchangeTokenResponse
+        console.log(resp.getAccessToken());
+        console.log(resp.getItemId());
       }
     );
   }

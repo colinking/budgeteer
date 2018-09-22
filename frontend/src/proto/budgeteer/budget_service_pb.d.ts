@@ -1,5 +1,5 @@
 // package: budgeteer
-// file: budgeteer/budget_service.proto
+// file: proto/budgeteer/budget_service.proto
 
 import * as jspb from "google-protobuf";
 

@@ -617,18 +617,20 @@ proto.plaid.Transaction.serializeBinaryToWriter = function(message, writer) {
  * @enum {number}
  */
 proto.plaid.Transaction.Type = {
-  UNRESOLVED: 0,
-  DIGITAL: 1,
-  PLACE: 2,
-  SPECIAL: 3
+  TRANSACTION_TYPE_INVALID: 0,
+  TRANSACTION_TYPE_UNRESOLVED: 1,
+  TRANSACTION_TYPE_DIGITAL: 2,
+  TRANSACTION_TYPE_PLACE: 3,
+  TRANSACTION_TYPE_SPECIAL: 4
 };
 
 /**
  * @enum {number}
  */
 proto.plaid.Transaction.Currency = {
-  USD: 0,
-  CAD: 1
+  TRANSACTION_CURRENCY_INVALID: 0,
+  TRANSACTION_CURRENCY_USD: 1,
+  TRANSACTION_CURRENCY_CAD: 2
 };
 
 

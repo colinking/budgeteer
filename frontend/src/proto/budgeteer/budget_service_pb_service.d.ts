@@ -1,7 +1,7 @@
 // package: budgeteer
-// file: budgeteer/budget_service.proto
+// file: proto/budgeteer/budget_service.proto
 
-import * as budgeteer_budget_service_pb from "../budgeteer/budget_service_pb";
+import * as proto_budgeteer_budget_service_pb from "../../proto/budgeteer/budget_service_pb";
 import {grpc} from "grpc-web-client";
 
 type BudgetServiceGetPurchase = {
@@ -9,8 +9,8 @@ type BudgetServiceGetPurchase = {
   readonly service: typeof BudgetService;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof budgeteer_budget_service_pb.GetPurchasesRequest;
-  readonly responseType: typeof budgeteer_budget_service_pb.Purchase;
+  readonly requestType: typeof proto_budgeteer_budget_service_pb.GetPurchasesRequest;
+  readonly responseType: typeof proto_budgeteer_budget_service_pb.Purchase;
 };
 
 export class BudgetService {
@@ -34,13 +34,13 @@ export class BudgetServiceClient {
 
   constructor(serviceHost: string, options?: ServiceClientOptions);
   getPurchase(
-    requestMessage: budgeteer_budget_service_pb.GetPurchasesRequest,
+    requestMessage: proto_budgeteer_budget_service_pb.GetPurchasesRequest,
     metadata: grpc.Metadata,
-    callback: (error: ServiceError, responseMessage: budgeteer_budget_service_pb.Purchase|null) => void
+    callback: (error: ServiceError, responseMessage: proto_budgeteer_budget_service_pb.Purchase|null) => void
   ): void;
   getPurchase(
-    requestMessage: budgeteer_budget_service_pb.GetPurchasesRequest,
-    callback: (error: ServiceError, responseMessage: budgeteer_budget_service_pb.Purchase|null) => void
+    requestMessage: proto_budgeteer_budget_service_pb.GetPurchasesRequest,
+    callback: (error: ServiceError, responseMessage: proto_budgeteer_budget_service_pb.Purchase|null) => void
   ): void;
 }
 

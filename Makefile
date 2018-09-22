@@ -30,7 +30,7 @@ ssh-docker-backend:
 	@docker run -it --entrypoint "/bin/bash" budgeteer
 
 .PHONY: run-local-server
-run-local-server: build-proto
+run-local-server: generate-protos
 	cd ${BACKEND_PATH} && go run cmd/main.go
 
 .PHONY: run-local-app
@@ -38,7 +38,7 @@ run-local-app:
 	@cd ${FRONTEND_PATH} && yarn start
 
 .PHONY: build
-build: build-proto docker-build
+build: generate-protos docker-build
 
 .PHONY: deps
 deps:
@@ -74,20 +74,9 @@ lint: node_modules
 	# TODO: set up eslint
 	# $(BIN)/eslint --ignore-path .gitignore '**/*.js' || (touch .circlec
 
-.PHONY: build-proto
-build-proto:
-	@rm -rf ${FRONTEND_PROTO_PATH} ${BACKEND_PROTO_PATH}
-	@mkdir -p ${FRONTEND_PROTO_PATH}
-	@mkdir -p ${BACKEND_PROTO_PATH}
-	@echo "Compiling protobuf definitions..."
-	@protowrap \
-		-I ${PROTO_DEF_PATH} \
-		--plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts \
-		--plugin=protoc-gen-go=${GOPATH}/bin/protoc-gen-go \
-		--ts_out=service=true:${FRONTEND_PROTO_PATH} \
-		--js_out=import_style=commonjs,binary:${FRONTEND_PROTO_PATH} \
-		--go_out=plugins=grpc:${BACKEND_PROTO_PATH} \
-		${PROTO_DEF_PATH}/**/*.proto
+.PHONY: generate-protos
+generate-protos:
+	@prototool generate
 
 certs:
 	@# Regenerate the self-signed certificate for local host. Recent versions of firefox and chrome(ium)
@@ -112,7 +101,7 @@ certs:
 	-out ${CERT_DIR}/localhost.crt -days 1024 -sha256 -extfile ${CERT_DIR}/localhost.conf -passin pass:$CERT_CA_PASSWORD
 
 .PHONY: install-cert-mac
-install-cert-mac: certs
+install-cert-mac:
 	@echo "Installing localhost cert to System keychain..."
 	@sudo security add-trusted-cert -d -r trustRoot -k "/Library/Keychains/System.keychain" ${CERT_DIR}/localhostCA.pem
 	@echo "Installed."

@@ -1,7 +1,7 @@
 // package: plaid
-// file: plaid/plaid_service.proto
+// file: proto/plaid/plaid_service.proto
 
-import * as plaid_plaid_service_pb from "../plaid/plaid_service_pb";
+import * as proto_plaid_plaid_service_pb from "../../proto/plaid/plaid_service_pb";
 import {grpc} from "grpc-web-client";
 
 type PlaidExchangeToken = {
@@ -9,8 +9,8 @@ type PlaidExchangeToken = {
   readonly service: typeof Plaid;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof plaid_plaid_service_pb.ExchangeTokenRequest;
-  readonly responseType: typeof plaid_plaid_service_pb.ExchangeTokenResponse;
+  readonly requestType: typeof proto_plaid_plaid_service_pb.ExchangeTokenRequest;
+  readonly responseType: typeof proto_plaid_plaid_service_pb.ExchangeTokenResponse;
 };
 
 type PlaidGetTransactions = {
@@ -18,8 +18,8 @@ type PlaidGetTransactions = {
   readonly service: typeof Plaid;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof plaid_plaid_service_pb.GetTransactionsRequest;
-  readonly responseType: typeof plaid_plaid_service_pb.GetTransactionsResponse;
+  readonly requestType: typeof proto_plaid_plaid_service_pb.GetTransactionsRequest;
+  readonly responseType: typeof proto_plaid_plaid_service_pb.GetTransactionsResponse;
 };
 
 export class Plaid {
@@ -44,22 +44,22 @@ export class PlaidClient {
 
   constructor(serviceHost: string, options?: ServiceClientOptions);
   exchangeToken(
-    requestMessage: plaid_plaid_service_pb.ExchangeTokenRequest,
+    requestMessage: proto_plaid_plaid_service_pb.ExchangeTokenRequest,
     metadata: grpc.Metadata,
-    callback: (error: ServiceError, responseMessage: plaid_plaid_service_pb.ExchangeTokenResponse|null) => void
+    callback: (error: ServiceError, responseMessage: proto_plaid_plaid_service_pb.ExchangeTokenResponse|null) => void
   ): void;
   exchangeToken(
-    requestMessage: plaid_plaid_service_pb.ExchangeTokenRequest,
-    callback: (error: ServiceError, responseMessage: plaid_plaid_service_pb.ExchangeTokenResponse|null) => void
+    requestMessage: proto_plaid_plaid_service_pb.ExchangeTokenRequest,
+    callback: (error: ServiceError, responseMessage: proto_plaid_plaid_service_pb.ExchangeTokenResponse|null) => void
   ): void;
   getTransactions(
-    requestMessage: plaid_plaid_service_pb.GetTransactionsRequest,
+    requestMessage: proto_plaid_plaid_service_pb.GetTransactionsRequest,
     metadata: grpc.Metadata,
-    callback: (error: ServiceError, responseMessage: plaid_plaid_service_pb.GetTransactionsResponse|null) => void
+    callback: (error: ServiceError, responseMessage: proto_plaid_plaid_service_pb.GetTransactionsResponse|null) => void
   ): void;
   getTransactions(
-    requestMessage: plaid_plaid_service_pb.GetTransactionsRequest,
-    callback: (error: ServiceError, responseMessage: plaid_plaid_service_pb.GetTransactionsResponse|null) => void
+    requestMessage: proto_plaid_plaid_service_pb.GetTransactionsRequest,
+    callback: (error: ServiceError, responseMessage: proto_plaid_plaid_service_pb.GetTransactionsResponse|null) => void
   ): void;
 }
 

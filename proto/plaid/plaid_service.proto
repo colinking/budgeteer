@@ -1,6 +1,12 @@
 syntax = "proto3";
 
 package plaid;
+option go_package = "plaidpb";
+
+service Plaid {
+  rpc ExchangeToken (ExchangeTokenRequest) returns (ExchangeTokenResponse);
+  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+}
 
 message ExchangeTokenRequest {
   string token = 1;
@@ -19,18 +25,20 @@ message Transaction {
   string category_id = 4;
 
   enum Type {
-    UNRESOLVED = 0;
-    DIGITAL = 1;
-    PLACE = 2;
-    SPECIAL = 3;
+    TRANSACTION_TYPE_INVALID = 0;
+    TRANSACTION_TYPE_UNRESOLVED = 1;
+    TRANSACTION_TYPE_DIGITAL = 2;
+    TRANSACTION_TYPE_PLACE = 3;
+    TRANSACTION_TYPE_SPECIAL = 4;
   }
   Type type = 5;
   string merchant_name = 6;
   double amount = 7;
 
   enum Currency {
-    USD = 0;
-    CAD = 1;
+    TRANSACTION_CURRENCY_INVALID = 0;
+    TRANSACTION_CURRENCY_USD = 1;
+    TRANSACTION_CURRENCY_CAD = 2;
   }
   Currency currency_type = 8;
 
@@ -67,9 +75,4 @@ message GetTransactionsRequest {}
 
 message GetTransactionsResponse {
   repeated Transaction transactions = 1;
-}
-
-service Plaid {
-  rpc ExchangeToken (ExchangeTokenRequest) returns (ExchangeTokenResponse);
-  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
 }

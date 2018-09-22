@@ -1,5 +1,5 @@
 // package: plaid
-// file: plaid/plaid_service.proto
+// file: proto/plaid/plaid_service.proto
 
 import * as jspb from "google-protobuf";
 
@@ -213,15 +213,17 @@ export namespace Transaction {
   }
 
   export enum Type {
-    UNRESOLVED = 0,
-    DIGITAL = 1,
-    PLACE = 2,
-    SPECIAL = 3,
+    TRANSACTION_TYPE_INVALID = 0,
+    TRANSACTION_TYPE_UNRESOLVED = 1,
+    TRANSACTION_TYPE_DIGITAL = 2,
+    TRANSACTION_TYPE_PLACE = 3,
+    TRANSACTION_TYPE_SPECIAL = 4,
   }
 
   export enum Currency {
-    USD = 0,
-    CAD = 1,
+    TRANSACTION_CURRENCY_INVALID = 0,
+    TRANSACTION_CURRENCY_USD = 1,
+    TRANSACTION_CURRENCY_CAD = 2,
   }
 }
 

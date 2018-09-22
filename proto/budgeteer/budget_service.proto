@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package budgeteer;
-option go_package = "budgeteer";
+option go_package = "budgeteerpb";
 
 message Purchase {
   string id = 1;

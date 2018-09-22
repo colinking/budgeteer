@@ -1,7 +1,7 @@
 // package: budgeteer
-// file: budgeteer/budget_service.proto
+// file: proto/budgeteer/budget_service.proto
 
-var budgeteer_budget_service_pb = require("../budgeteer/budget_service_pb");
+var proto_budgeteer_budget_service_pb = require("../../proto/budgeteer/budget_service_pb");
 var grpc = require("grpc-web-client").grpc;
 
 var BudgetService = (function () {
@@ -15,8 +15,8 @@ BudgetService.GetPurchase = {
   service: BudgetService,
   requestStream: false,
   responseStream: false,
-  requestType: budgeteer_budget_service_pb.GetPurchasesRequest,
-  responseType: budgeteer_budget_service_pb.Purchase
+  requestType: proto_budgeteer_budget_service_pb.GetPurchasesRequest,
+  responseType: proto_budgeteer_budget_service_pb.Purchase
 };
 
 exports.BudgetService = BudgetService;
