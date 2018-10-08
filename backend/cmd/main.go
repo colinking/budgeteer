@@ -24,6 +24,8 @@ type Config struct {
 	Port    int    `default:"9091" required:"false"`
 	CertDir string `default:"certs/" required:"false"`
 
+	DbPort int `default:"9092" required:"false"`
+
 	// Plaid
 	PlaidClientID  string `required:"true" split_words:"true"`
 	PlaidPublicKey string `required:"true" split_words:"true"`
