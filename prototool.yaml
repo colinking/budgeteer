@@ -1,0 +1,21 @@
+excludes:
+  - node_modules
+  - backend/vendor
+  - frontend/node_modules
+
+protoc:
+  version: 3.6.1
+
+generate:
+  plugins:
+    - name: go
+      flags: plugins=grpc
+      output: ./backend/pkg
+
+    - name: ts
+      output: ./frontend/src
+      flags: service=true
+      path: ./node_modules/.bin/protoc-gen-ts
+    - name: js
+      output: ./frontend/src
+      flags: import_style=commonjs,binary

@@ -1,0 +1,22 @@
+{
+  "extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
+  "linterOptions": {
+    "exclude": [
+      "config/**/*.js",
+      "node_modules/**/*.ts",
+      "coverage/lcov-report/*.js",
+      "src/proto/**/*"
+    ]
+  },
+  "rules": {
+    "no-console": {
+      "severity": "warning"
+    },
+    "interface-name": {
+      "options": "never-prefix"
+    },
+    "no-empty-interface": {
+      "severity": "off"
+    }
+  }
+}
