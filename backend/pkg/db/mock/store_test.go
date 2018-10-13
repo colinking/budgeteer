@@ -1,6 +1,8 @@
-package db
+package mock
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestToken(t *testing.T) {
 	d := New()
