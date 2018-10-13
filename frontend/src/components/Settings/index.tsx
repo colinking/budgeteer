@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { getHost } from '../../lib/client';
+import { getHost } from '../../lib/host';
 import { ExchangeTokenRequest, ExchangeTokenResponse } from '../../proto/plaid/plaid_service_pb';
 import { PlaidClient, ServiceError } from '../../proto/plaid/plaid_service_pb_service';
 import SettingsComponent from './SettingsComponent';
