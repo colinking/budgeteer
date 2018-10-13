@@ -4,6 +4,7 @@ ENV ?= $(shell if [ "$(CIRCLE_BRANCH)" = "master" ]; then echo "production"; eli
 
 PORT := 9091
 GIN_PORT := 3000
+DYNAMODB_PORT := 9092
 
 FRONTEND_PATH := frontend
 BACKEND_PATH := backend
@@ -36,6 +37,10 @@ run-local-server: generate-protos
 .PHONY: run-local-app
 run-local-app:
 	@cd ${FRONTEND_PATH} && yarn start
+
+.PHONY: run-local-db
+run-local-db:
+	@docker run -p ${DYNAMODB_PORT}:8000 amazon/dynamodb-local
 
 .PHONY: build
 build: generate-protos docker-build
