@@ -16,6 +16,7 @@ import (
 	plaid_proto "github.com/colinking/budgeteer/backend/pkg/proto/plaid"
 	"github.com/colinking/budgeteer/backend/pkg/services"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
+	"google.golang.org/grpc/reflection"
 )
 
 // Config specifies the expected environment variables
@@ -50,6 +51,7 @@ func registerEndpoints(server *grpc.Server, c Config) {
 func startServer(c Config) {
 	grpcServer := grpc.NewServer()
 	registerEndpoints(grpcServer, c)
+	reflection.Register(grpcServer)
 
 	// TODO: how to pass in context with plaid object?
 	wrappedServer := grpcweb.WrapServer(grpcServer)
