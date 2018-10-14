@@ -1,8 +1,7 @@
-package services
+package plaid
 
 import (
 	"context"
-	"net/http"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -10,40 +9,39 @@ import (
 
 	"github.com/colinking/budgeteer/backend/pkg/db"
 	proto "github.com/colinking/budgeteer/backend/pkg/proto/plaid"
-	"github.com/colinking/budgeteer/backend/pkg/services/utils"
 	"github.com/plaid/plaid-go/plaid"
 )
 
-type PlaidService struct {
+// Service contains all Plaid-related handlers.
+type Service struct {
 	client *plaid.Client
 	db     db.Database
 }
 
+// ServiceConfig specifies the configuration for a new Plaid Service.
+type ServiceConfig struct {
+	ClientID string
+	PublicKey string
+	Secret string
+	Env string
+	Database db.Database
+}
+
 // Validate implementation of proto interface.
-var _ proto.PlaidServer = &PlaidService{}
+var _ proto.PlaidServer = &Service{}
 
-// New returns a new instance of a plaid service client.
-func New(clientID, publicKey, secret, env string) *PlaidService {
-	client, err := plaid.NewClient(plaid.ClientOptions{
-		ClientID:    clientID,
-		Secret:      secret,
-		PublicKey:   publicKey,
-		Environment: utils.ToEnvironment(env),
-		HTTPClient:  &http.Client{},
-	})
+// New returns a new instance of a Plaid service client.
+func New(c *ServiceConfig) *Service {
+	client := newClient(c.ClientID, c.PublicKey, c.Secret, c.Env)
 
-	if err != nil {
-		grpclog.Fatalf("failed to initialize Plaid client: %v", err)
-	}
-
-	return &PlaidService{
+	return &Service{
 		client: client,
-		db:     db.New(),
+		db:     c.Database,
 	}
 }
 
 // ExchangeToken converts a public token into an access token and stores it in the DB.
-func (s *PlaidService) ExchangeToken(ctx context.Context, in *proto.ExchangeTokenRequest) (*proto.ExchangeTokenResponse, error) {
+func (s *Service) ExchangeToken(ctx context.Context, in *proto.ExchangeTokenRequest) (*proto.ExchangeTokenResponse, error) {
 	res, err := s.client.ExchangePublicToken(in.Token)
 	if err != nil {
 		grpclog.Error(err)
@@ -51,7 +49,7 @@ func (s *PlaidService) ExchangeToken(ctx context.Context, in *proto.ExchangeToke
 	}
 
 	grpclog.Infof("Exchanged public token (%s) for access token (%s)", in.Token, res.AccessToken)
-	s.db.SaveToken(res.AccessToken)
+	s.db.SaveToken("1234", res.AccessToken)
 
 	return &proto.ExchangeTokenResponse{
 		AccessToken: res.AccessToken,
@@ -60,10 +58,10 @@ func (s *PlaidService) ExchangeToken(ctx context.Context, in *proto.ExchangeToke
 }
 
 // GetTransactions gets the transactions for a given user.
-func (s *PlaidService) GetTransactions(ctx context.Context, in *proto.GetTransactionsRequest) (*proto.GetTransactionsResponse, error) {
+func (s *Service) GetTransactions(ctx context.Context, in *proto.GetTransactionsRequest) (*proto.GetTransactionsResponse, error) {
 	startDate, endDate := "2018-08-01", "2018-08-31"
 
-	accessToken := s.db.GetToken()
+	accessToken := s.db.GetToken("1234")
 
 	res, err := s.client.GetTransactions(accessToken, startDate, endDate)
 	if err != nil {
@@ -73,7 +71,7 @@ func (s *PlaidService) GetTransactions(ctx context.Context, in *proto.GetTransac
 
 	transactions := []*proto.Transaction{}
 	for _, tx := range res.Transactions {
-		transactions = append(transactions, utils.ToTransaction(tx))
+		transactions = append(transactions, toTransaction(tx))
 	}
 
 	grpclog.Infof("Found %d products for access token: %s\n", res.TotalTransactions, accessToken)

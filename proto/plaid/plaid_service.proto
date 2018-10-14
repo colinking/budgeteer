@@ -9,7 +9,8 @@ service Plaid {
 }
 
 message ExchangeTokenRequest {
-  string token = 1;
+  string user_id = 1;
+  string token = 2;
 }
 
 message ExchangeTokenResponse {

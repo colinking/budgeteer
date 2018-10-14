@@ -7,12 +7,21 @@ type Plaid struct {
 
 // User stores metadata about one user account.
 type User struct {
-	Name  string
-	Plaid *Plaid
+	ID        string
+	FirstName string
+	LastName  string
+	Email     string
+	Plaid     *Plaid
 }
 
 // Database stores a DB connection.
 type Database interface {
-	SaveToken(string)
-	GetToken() string
+	// User API
+	StoreUser(u *User)
+	GetUser(userID string) *User
+	GetUserByEmail(email string) *User
+
+	// User.Plaid API
+	SaveToken(userID string, token string)
+	GetToken(userID string) (token string)
 }
