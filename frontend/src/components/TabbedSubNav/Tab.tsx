@@ -1,15 +1,12 @@
-import React from 'react';
+import * as React from 'react'
 
-import { Tab } from 'evergreen-ui';
-import {
-  Link,
-  RouteProps
-} from 'react-router-dom';
+import { Tab } from 'evergreen-ui'
+import { Link, RouteProps } from 'react-router-dom'
 
 export interface NavigationBarTabProps {
-  to: string;
-  label: string;
-  location: RouteProps['location'];
+  to: string
+  label: string
+  location: RouteProps['location']
 }
 
 const NavigationBarTab: React.SFC<NavigationBarTabProps> = ({
@@ -18,13 +15,13 @@ const NavigationBarTab: React.SFC<NavigationBarTabProps> = ({
   location
 }) => {
   const isActive =
-    location && (location.pathname === to || location.pathname.startsWith(to));
+    location && (location.pathname === to || location.pathname.startsWith(to))
 
   return (
     <Tab is={Link} to={to} isSelected={isActive}>
       {label}
     </Tab>
-  );
-};
+  )
+}
 
 export default NavigationBarTab

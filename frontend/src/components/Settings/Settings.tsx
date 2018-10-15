@@ -1,15 +1,15 @@
-import { Card, Heading, majorScale, Pane } from 'evergreen-ui';
-import React from 'react';
-import PlaidLink from 'react-plaid-link';
+import { Card, Heading, majorScale, Pane } from 'evergreen-ui'
+import * as React from 'react'
+import PlaidLink from 'react-plaid-link'
 
 export interface SettingsProps {
-  plaidEnv: string,
-  plaidPublicKey: string,
-  handleOnLinkExit: (err: Error | undefined) => void,
+  plaidEnv: string
+  plaidPublicKey: string
+  handleOnLinkExit: (err: Error | undefined) => void
   handleOnLinkSuccess: (token: string, metadata: any) => void
 }
 
-export default class SettingsComponent extends React.Component<SettingsProps> {
+export default class Settings extends React.Component<SettingsProps> {
   public render() {
     const props = this.props
 
@@ -38,6 +38,6 @@ export default class SettingsComponent extends React.Component<SettingsProps> {
           </Pane>
         </Card>
       </Pane>
-    );
+    )
   }
 }

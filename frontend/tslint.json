@@ -17,6 +17,11 @@
     },
     "no-empty-interface": {
       "severity": "off"
-    }
+    },
+    "jsx-boolean-value": {
+      "options": "never"
+    },
+    "object-literal-sort-keys": false,
+    "semicolon": [true, "never"]
   }
 }
