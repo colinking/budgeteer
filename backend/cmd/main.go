@@ -8,6 +8,7 @@ import (
 	"github.com/colinking/budgeteer/backend/pkg/db"
 	"github.com/colinking/budgeteer/backend/pkg/db/dynamodb"
 	"github.com/colinking/budgeteer/backend/pkg/handlers/plaid"
+	"github.com/colinking/budgeteer/backend/pkg/handlers/user"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
@@ -16,6 +17,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 
 	plaid_proto "github.com/colinking/budgeteer/backend/pkg/proto/plaid"
+	user_proto "github.com/colinking/budgeteer/backend/pkg/proto/user"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"google.golang.org/grpc/reflection"
 
@@ -56,6 +58,9 @@ func registerEndpoints(server *grpc.Server, c Config, db db.Database) {
 		PublicKey: c.PlaidPublicKey,
 		Secret: c.PlaidSecret,
 		Env: c.PlaidEnv,
+		Database: db,
+	}))
+	user_proto.RegisterUserServiceServer(server, user.New(&user.ServiceConfig{
 		Database: db,
 	}))
 }

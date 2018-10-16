@@ -4,6 +4,9 @@
 import * as jspb from "google-protobuf";
 
 export class ExchangeTokenRequest extends jspb.Message {
+  getUserId(): string;
+  setUserId(value: string): void;
+
   getToken(): string;
   setToken(value: string): void;
 
@@ -19,6 +22,7 @@ export class ExchangeTokenRequest extends jspb.Message {
 
 export namespace ExchangeTokenRequest {
   export type AsObject = {
+    userId: string,
     token: string,
   }
 }

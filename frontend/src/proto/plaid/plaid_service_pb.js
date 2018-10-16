@@ -67,7 +67,8 @@ proto.plaid.ExchangeTokenRequest.prototype.toObject = function(opt_includeInstan
  */
 proto.plaid.ExchangeTokenRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    token: jspb.Message.getFieldWithDefault(msg, 1, "")
+    userId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    token: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -106,6 +107,10 @@ proto.plaid.ExchangeTokenRequest.deserializeBinaryFromReader = function(msg, rea
     switch (field) {
     case 1:
       var value = /** @type {string} */ (reader.readString());
+      msg.setUserId(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
       msg.setToken(value);
       break;
     default:
@@ -137,10 +142,17 @@ proto.plaid.ExchangeTokenRequest.prototype.serializeBinary = function() {
  */
 proto.plaid.ExchangeTokenRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getToken();
+  f = message.getUserId();
   if (f.length > 0) {
     writer.writeString(
       1,
+      f
+    );
+  }
+  f = message.getToken();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
       f
     );
   }
@@ -148,17 +160,32 @@ proto.plaid.ExchangeTokenRequest.serializeBinaryToWriter = function(message, wri
 
 
 /**
- * optional string token = 1;
+ * optional string user_id = 1;
  * @return {string}
  */
-proto.plaid.ExchangeTokenRequest.prototype.getToken = function() {
+proto.plaid.ExchangeTokenRequest.prototype.getUserId = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
 /** @param {string} value */
-proto.plaid.ExchangeTokenRequest.prototype.setToken = function(value) {
+proto.plaid.ExchangeTokenRequest.prototype.setUserId = function(value) {
   jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string token = 2;
+ * @return {string}
+ */
+proto.plaid.ExchangeTokenRequest.prototype.getToken = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/** @param {string} value */
+proto.plaid.ExchangeTokenRequest.prototype.setToken = function(value) {
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 

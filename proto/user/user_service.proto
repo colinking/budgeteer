@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package user;
+option go_package = "userpb";
+
+message User {
+  string auth_id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
+  string picture = 5;
+}
+
+message UserLoginRequest {
+  User user = 1;
+}
+
+message UserLoginResponse {
+  // Whether this is a new user or not.
+  bool new = 1;
+}
+
+service UserService {
+  rpc UserLogin(UserLoginRequest) returns (UserLoginResponse) {}
+}

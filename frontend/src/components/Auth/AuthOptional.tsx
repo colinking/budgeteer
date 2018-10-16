@@ -1,11 +1,10 @@
 import * as React from 'react'
-import { RouteComponentProps, withRouter } from 'react-router-dom'
 import UserProvider from '../../context/User'
 
-class AuthOptional extends React.Component<RouteComponentProps<any>> {
+class AuthOptional<P> extends React.Component<P> {
   public render() {
     return <UserProvider>{this.props.children}</UserProvider>
   }
 }
 
-export default withRouter(AuthOptional)
+export default AuthOptional
