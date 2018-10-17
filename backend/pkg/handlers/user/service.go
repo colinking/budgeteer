@@ -12,6 +12,9 @@ type Service struct {
 }
 
 func (s Service) UserLogin(context.Context, *proto.UserLoginRequest) (*proto.UserLoginResponse, error) {
+	// Get user by auth0 user id
+	
+
 	//	TODO, actually implement
 	return &proto.UserLoginResponse{
 		New: true,

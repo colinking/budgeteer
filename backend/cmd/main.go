@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -83,7 +84,14 @@ func startServer(c Config) {
 	wrappedServer := grpcweb.WrapServer(grpcServer)
 	grpcMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-			wrappedServer.ServeHTTP(resp, req)
+			grpclog.Infof("Handling chi request")
+			if wrappedServer.IsAcceptableGrpcCorsRequest(req) || wrappedServer.IsGrpcWebRequest(req) {
+				grpclog.Infof("-> appears to be a grpc request")
+				wrappedServer.ServeHTTP(resp, req)
+				return
+			}
+			grpclog.Infof("-> appears to be a non-grpc request")
+			next.ServeHTTP(resp, req)
 		})
 	}
 
@@ -95,6 +103,11 @@ func startServer(c Config) {
 		chiMiddleware.Heartbeat("/healthz"),
 		grpcMiddleware,
 	)
+
+	// Minimal handler to support above gRPC middleware.
+	r.Get("/", func(resp http.ResponseWriter, req *http.Request) {
+		io.WriteString(resp, "This server only supports gRPC endpoints.")
+	})
 
 	addr := fmt.Sprintf("localhost:%d", c.Port)
 	grpclog.Infof("starting server listing on: https://%s", addr)

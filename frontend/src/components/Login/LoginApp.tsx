@@ -18,7 +18,6 @@ class LoginApp extends React.Component<RouteComponentProps<any>> {
     const hash = this.props.location.hash
     if (/access_token|id_token|error/.test(hash)) {
       await handleAuthenticationCallback(hash)
-      await this.registerNewUser()
     }
 
     if (isAuthenticated()) {
