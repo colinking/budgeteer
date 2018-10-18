@@ -1,25 +1,13 @@
 # budgeteer
-✨ Make Budget Management Magical 🎩
-
-## Setup
-
-You'll need to install the `protoc` protobuf compiler.
-
-macOS: run `brew install protobuf`.
-
-For Windows or Linux, see [the protoc installation page](http://google.github.io/proto-lens/installing-protoc.html).
+✨ Make Budget Management Magical
 
 ### Configuring localhost for HTTPS
 
-You need to configure your browser to trust a self-generated HTTPs certificate, because this gRPC library relies on HTTP/2.
+You need to configure your browser to trust a self-generated HTTPs certificate, because this project uses gRPC over HTTP/2.
 
 macOS: run `make install-certs-mac`.
 
 For Windows or Linux, run `make certs` to generate the required certificates, then install them in your default browser.
-
-## Stack
-
-Wrap backend and app in Dockerfiles. Deploy to Heroku?
 
 ## References
 
