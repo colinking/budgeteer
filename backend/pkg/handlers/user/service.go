@@ -4,6 +4,7 @@ import (
 	"github.com/colinking/budgeteer/backend/pkg/db"
 	proto "github.com/colinking/budgeteer/backend/pkg/proto/user"
 	"golang.org/x/net/context"
+	"google.golang.org/grpc/grpclog"
 )
 
 // Service contains all User-related handlers.
@@ -11,9 +12,10 @@ type Service struct {
 	db     db.Database
 }
 
-func (s Service) UserLogin(context.Context, *proto.UserLoginRequest) (*proto.UserLoginResponse, error) {
+func (s Service) UserLogin(ctx context.Context, req *proto.UserLoginRequest) (*proto.UserLoginResponse, error) {
 	// Get user by auth0 user id
-	
+	grpclog.Infof("Hello World! this is the UserLogin method\n" +
+		"id: " + req.User.AuthId)
 
 	//	TODO, actually implement
 	return &proto.UserLoginResponse{

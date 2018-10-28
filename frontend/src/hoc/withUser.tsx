@@ -14,8 +14,6 @@ export default function withUser<P extends ProviderProps>(
       return (
         <Consumer>
           {({ user }: ProviderProps) => {
-            console.log('consumer: ')
-            console.log(user)
             return <Component {...this.props} user={user} />
           }}
         </Consumer>

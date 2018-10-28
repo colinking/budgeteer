@@ -11,13 +11,32 @@ import { getHost } from '../../lib/host'
 import { User, UserLoginRequest } from '../../proto/user/user_service_pb'
 import { UserServiceClient } from '../../proto/user/user_service_pb_service'
 import { REDIRECT_KEY } from '../Auth'
+import Error, { WithError } from '../Error'
 import Login from './Login'
 
-class LoginApp extends React.Component<RouteComponentProps<any>> {
+interface LoginState {
+  error?: WithError
+}
+
+class LoginApp extends React.Component<RouteComponentProps<any>, LoginState> {
+  public state = {
+    error: undefined
+  }
+
   public async componentDidMount() {
     const hash = this.props.location.hash
     if (/access_token|id_token|error/.test(hash)) {
-      await handleAuthenticationCallback(hash)
+      try {
+        await handleAuthenticationCallback(hash)
+      } catch (err) {
+        this.setState({
+          error: {
+            error: err.error,
+            description: err.errorDescription
+          }
+        })
+        return
+      }
     }
 
     if (isAuthenticated()) {
@@ -37,7 +56,7 @@ class LoginApp extends React.Component<RouteComponentProps<any>> {
   }
 
   public render() {
-    return <Login />
+    return this.state.error ? <Error {...this.state.error!}/> : <Login />
   }
 
   protected async registerNewUser() {

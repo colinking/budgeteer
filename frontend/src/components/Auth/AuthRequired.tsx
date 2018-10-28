@@ -9,7 +9,6 @@ class AuthRequired extends AuthOptional<RouteComponentProps<any>> {
     super(props)
 
     if (!isAuthenticated()) {
-      console.log(props)
       localStorage.setItem(REDIRECT_KEY, JSON.stringify(props.location))
       props.history.push('/login')
     }

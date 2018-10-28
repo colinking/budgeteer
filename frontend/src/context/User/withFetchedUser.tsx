@@ -38,8 +38,7 @@ export default function withFetchedUser<P extends WithFetchedUserState>(
     protected async checkForLogin() {
       if (isAuthenticated()) {
         const user = await getLoggedInUser()
-        console.log('checkForLogin: auth-ed')
-        console.log(user)
+        console.log('checkForLogin: auth-ed', user)
         this.setState({ user })
       } else {
         console.log('checkForLogin: NOT auth-ed')

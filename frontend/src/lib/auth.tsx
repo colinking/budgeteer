@@ -21,6 +21,7 @@ const auth = new auth0.WebAuth({
   clientID: process.env.REACT_APP_AUTH0_CLIENT_ID as string,
   domain: process.env.REACT_APP_AUTH0_DOMAIN as string,
   redirectUri: process.env.REACT_APP_AUTH0_CALLBACK_URL as string,
+  audience: process.env.REACT_APP_BACKEND_AUDIENCE_ID as string,
   responseType: 'token id_token',
   scope: 'openid profile email'
 })
