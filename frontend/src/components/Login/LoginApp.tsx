@@ -63,7 +63,6 @@ class LoginApp extends React.Component<RouteComponentProps<any>, LoginState> {
     const u = await getLoggedInUser()
 
     const user = new User()
-    user.setAuthId(u.auth_id)
     user.setFirstname(u.firstName)
     user.setLastname(u.lastName)
     user.setEmail(u.email)

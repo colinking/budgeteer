@@ -111,6 +111,7 @@ func startServer(c Config) {
 		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 			if wrappedServer.IsGrpcWebRequest(req) {
 				// Perform auth validation only on gRPC requests.
+				// TODO: perform extra validation on the iss/aud/exp fields.
 				verifier := jwtauth.Verifier(jwtauth.New("RS256", nil, key))
 				verifier(jwtauth.Authenticator(next)).ServeHTTP(resp, req)
 			} else {
