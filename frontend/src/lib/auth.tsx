@@ -79,7 +79,7 @@ export function logout(): void {
   window.dispatchEvent(new Event('storage'))
 }
 
-function getAccessToken(): string {
+export function getAccessToken(): string {
   const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
   if (!accessToken) {
     throw new Error('No access token found')

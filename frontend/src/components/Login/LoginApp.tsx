@@ -7,7 +7,7 @@ import {
   isAuthenticated,
   login
 } from '../../lib/auth'
-import { getHost } from '../../lib/host'
+import { getHost, getMetadata } from '../../lib/requests'
 import { User, UserLoginRequest } from '../../proto/user/user_service_pb'
 import { UserServiceClient } from '../../proto/user/user_service_pb_service'
 import { REDIRECT_KEY } from '../Auth'
@@ -71,14 +71,17 @@ class LoginApp extends React.Component<RouteComponentProps<any>, LoginState> {
     const req = new UserLoginRequest()
     req.setUser(user)
 
-    new UserServiceClient(getHost()).userLogin(req, (err, res) => {
-      if (err) {
-        console.error(err)
-        throw err
-      }
+    new UserServiceClient(getHost()).userLogin(req,
+      getMetadata(),
+      (err, res) => {
+        if (err) {
+          console.error(err)
+          throw err
+        }
 
-      console.log(`Registered user. Are they new? ${res!.getNew()}`)
-    })
+        console.log(`Registered user. Are they new? ${res!.getNew()}`)
+      }
+    )
   }
 }
 

@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/colinking/budgeteer/backend/pkg/auth"
+	"github.com/go-chi/jwtauth"
 	"io"
 	"net/http"
 	"os"
@@ -17,8 +19,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 
-	plaid_proto "github.com/colinking/budgeteer/backend/pkg/proto/plaid"
-	user_proto "github.com/colinking/budgeteer/backend/pkg/proto/user"
+	plaidProto "github.com/colinking/budgeteer/backend/pkg/proto/plaid"
+	userProto "github.com/colinking/budgeteer/backend/pkg/proto/user"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"google.golang.org/grpc/reflection"
 
@@ -54,21 +56,21 @@ func loadConfigVars() (Config, error) {
 
 // registerEndpoints registers all API endpoints for a given gRPC server.
 func registerEndpoints(server *grpc.Server, c Config, db db.Database) {
-	plaid_proto.RegisterPlaidServer(server, plaid.New(&plaid.ServiceConfig{
+	plaidProto.RegisterPlaidServer(server, plaid.New(&plaid.ServiceConfig{
 		ClientID: c.PlaidClientID,
 		PublicKey: c.PlaidPublicKey,
 		Secret: c.PlaidSecret,
 		Env: c.PlaidEnv,
 		Database: db,
 	}))
-	user_proto.RegisterUserServiceServer(server, user.New(&user.ServiceConfig{
+	userProto.RegisterUserServiceServer(server, user.New(&user.ServiceConfig{
 		Database: db,
 	}))
 }
 
 func startServer(c Config) {
 	// Open DB connection
-	db, err := dynamodb.New(&dynamodb.Config{
+	dynamo, err := dynamodb.New(&dynamodb.Config{
 		Port: c.DbPort,
 	})
 	if err != nil {
@@ -77,21 +79,43 @@ func startServer(c Config) {
 
 	// Register gRPC endpoints
 	grpcServer := grpc.NewServer()
-	registerEndpoints(grpcServer, c, db)
+	registerEndpoints(grpcServer, c, dynamo)
 	reflection.Register(grpcServer)
 
 	// Wrap the grpc-web HTTP wrapper around the gRPC server
 	wrappedServer := grpcweb.WrapServer(grpcServer)
 	grpcMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-			grpclog.Infof("Handling chi request")
-			if wrappedServer.IsAcceptableGrpcCorsRequest(req) || wrappedServer.IsGrpcWebRequest(req) {
-				grpclog.Infof("-> appears to be a grpc request")
+			if wrappedServer.IsAcceptableGrpcCorsRequest(req) {
+				grpclog.Infof("Incoming grpc cors-preflight request")
 				wrappedServer.ServeHTTP(resp, req)
-				return
+			} else if wrappedServer.IsGrpcWebRequest(req) {
+				grpclog.Infof("Incoming grpc request")
+				wrappedServer.ServeHTTP(resp, req)
+			} else {
+				grpclog.Infof("Incoming non-grpc request")
+				next.ServeHTTP(resp, req)
 			}
-			grpclog.Infof("-> appears to be a non-grpc request")
-			next.ServeHTTP(resp, req)
+		})
+	}
+
+	// Load our Auth0 public key to validate requests.
+	jwks := auth.New()
+	key, err := jwks.GetFirstValidationKey()
+	if err != nil {
+		panic(err)
+	}
+
+	// Add middleware to validate that all gRPC requests are authorized with Auth0.
+	validationMiddle := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			if wrappedServer.IsGrpcWebRequest(req) {
+				// Perform auth validation only on gRPC requests.
+				verifier := jwtauth.Verifier(jwtauth.New("RS256", nil, key))
+				verifier(jwtauth.Authenticator(next)).ServeHTTP(resp, req)
+			} else {
+				next.ServeHTTP(resp, req)
+			}
 		})
 	}
 
@@ -101,6 +125,7 @@ func startServer(c Config) {
 		chiMiddleware.Logger,
 		chiMiddleware.Recoverer,
 		chiMiddleware.Heartbeat("/healthz"),
+		validationMiddle,
 		grpcMiddleware,
 	)
 

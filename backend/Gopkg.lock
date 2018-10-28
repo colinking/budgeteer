@@ -41,6 +41,22 @@
   version = "v1.15.54"
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:a9fe0f8ff72c388d0128e88ce5f3c27d37dcd0950acd7cdb8323555f12463396"
   name = "github.com/go-chi/chi"
   packages = [
@@ -50,6 +66,14 @@
   pruneopts = "UT"
   revision = "b5294d10673813fac8558e7f47242bc9e61b4c25"
   version = "v3.3.3"
+
+[[projects]]
+  digest = "1:49d45e550e71bc3662b46e746ac297e2d60a227702a2e3ae5103035f5187c35e"
+  name = "github.com/go-chi/jwtauth"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "fcf2c975beb3edf5fd627d4904f693ebfc3c4363"
+  version = "v4.0.0"
 
 [[projects]]
   digest = "1:b98e7574fc27ec166fb31195ec72c3bd0bffd73926d3612eb4c929bc5236f75b"
@@ -117,6 +141,34 @@
   pruneopts = "UT"
   revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
   version = "v1.3.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:7ea84716ab53c13c7a574fb955ee037f31bfd6e519ad1b8299eda40aa05edf33"
+  name = "github.com/lestrrat/go-jwx"
+  packages = [
+    "internal/base64",
+    "jwa",
+    "jwk",
+  ]
+  pruneopts = "UT"
+  revision = "b7d4802280aef47b8786da314e8675d41d980b04"
+
+[[projects]]
+  branch = "master"
+  digest = "1:27f17849bfe2b9119be21d515c086880a001f9a7e4df1e95d8f8a63ba447001b"
+  name = "github.com/lestrrat/go-pdebug"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "569c97477ae8837e053e5a50bc739e15172b8ebe"
+
+[[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   digest = "1:4ecb6f0baafbb1d9fa8c6eeecc52a2f1851fa125749f8565ff8fb96d3522c16c"
@@ -238,11 +290,13 @@
     "github.com/aws/aws-sdk-go/service/dynamodb",
     "github.com/go-chi/chi",
     "github.com/go-chi/chi/middleware",
+    "github.com/go-chi/jwtauth",
     "github.com/golang/protobuf/proto",
     "github.com/golang/protobuf/protoc-gen-go",
     "github.com/improbable-eng/grpc-web/go/grpcweb",
     "github.com/joho/godotenv",
     "github.com/kelseyhightower/envconfig",
+    "github.com/lestrrat/go-jwx/jwk",
     "github.com/plaid/plaid-go/plaid",
     "golang.org/x/net/context",
     "google.golang.org/grpc",

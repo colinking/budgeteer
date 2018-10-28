@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { getHost } from '../../lib/host'
+import { getHost, getMetadata } from '../../lib/requests'
 import {
   ExchangeTokenRequest,
   ExchangeTokenResponse
@@ -37,6 +37,7 @@ export default class Settings extends React.Component<SettingsProps> {
     console.log(req)
     new PlaidClient(getHost()).exchangeToken(
       req,
+      getMetadata(),
       (
         error: ServiceError | null,
         responseMessage: ExchangeTokenResponse | null
