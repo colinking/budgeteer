@@ -13,6 +13,8 @@ PROTO_DEF_PATH := proto
 FRONTEND_PROTO_PATH := ./${FRONTEND_PATH}/src/proto
 BACKEND_PROTO_PATH := ./${BACKEND_PATH}/pkg/proto
 
+MIGRATIONS_PATH := ${BACKEND_PATH}/migrations
+
 CERT_DIR := ./${BACKEND_PATH}/certs
 CERT_CA_PASSWORD := "very-safe-passw0rd"
 
@@ -39,7 +41,7 @@ run-local-app:
 .PHONY: run-local-db
 run-local-db:
 	docker rm moss-db > /dev/null || true
-	docker run -p ${DB_PORT}:3306 --name moss-db -e MYSQL_ROOT_PASSWORD=password mysql:5.6
+	docker run -p ${DB_PORT}:3306 --name moss-db -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=moss mysql:5.6
 
 # Docker connect
 
@@ -50,6 +52,23 @@ connect-local-db:
 .PHONY: ssh-docker-backend
 ssh-docker-backend:
 	@docker run -it --entrypoint "/bin/bash" budgeteer
+
+# Database Migrations
+
+$(GOPATH)/bin/migrate:
+	go get -u github.com/golang-migrate/migrate
+	go build -o $(GOPATH)/bin/migrate github.com/golang-migrate/migrate/cli
+
+.PHONY: migratedb
+migratedb-local: $(GOPATH)/bin/migrate
+	@migrate -path ${MIGRATIONS_PATH} -database mysql://root:password@tcp\(127.0.0.1:${DB_PORT}\)/moss up
+
+.PHONY: create-migration
+create-migration: $(GOPATH)/bin/migrate
+	@migrate create -dir ${MIGRATIONS_PATH} -ext sql ${MIGRATION}
+
+drop-local-db: $(GOPATH)/bin/migrate
+	@migrate -path ${MIGRATIONS_PATH} -database mysql://root:password@tcp\(127.0.0.1:${DB_PORT}\)/moss drop
 
 # Other
 

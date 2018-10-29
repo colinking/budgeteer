@@ -17,3 +17,4 @@ For Windows or Linux, run `make certs` to generate the required certificates, th
 - [gRPC CLI](https://github.com/njpatel/grpcc)
 - [openssl command](https://letsencrypt.org/docs/certificates-for-localhost/#making-and-trusting-your-own-certificates)
 - [react-router-v4](https://codeburst.io/react-router-v4-unofficial-migration-guide-5a370b8905a)
+- [Aurora Serverless Limitations](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless.html)
