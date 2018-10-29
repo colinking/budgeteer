@@ -4,7 +4,7 @@ ENV ?= $(shell if [ "$(CIRCLE_BRANCH)" = "master" ]; then echo "production"; eli
 
 PORT := 9091
 GIN_PORT := 3000
-DYNAMODB_PORT := 9092
+DB_PORT := 9092
 
 FRONTEND_PATH := frontend
 BACKEND_PATH := backend
@@ -20,15 +20,13 @@ TAG := latest
 
 .DEFAULT_GOAL := run
 
+# Run
+
 .PHONY: run
 run: build
 	@# TODO: this doesn't work, something to do with the port forwarding...
 	@echo "Running version :${TAG}..."
 	@docker run -it -p ${PORT}:${PORT} budgeteer:${TAG} --name budgeteer
-
-.PHONY: ssh-docker-backend
-ssh-docker-backend:
-	@docker run -it --entrypoint "/bin/bash" budgeteer
 
 .PHONY: run-local-server
 run-local-server: generate-protos
@@ -40,7 +38,20 @@ run-local-app:
 
 .PHONY: run-local-db
 run-local-db:
-	@docker run -p ${DYNAMODB_PORT}:8000 amazon/dynamodb-local
+	docker rm moss-db > /dev/null || true
+	docker run -p ${DB_PORT}:3306 --name moss-db -e MYSQL_ROOT_PASSWORD=password mysql:5.6
+
+# Docker connect
+
+.PHONY: connect-local-db
+connect-local-db:
+	mysql --host=127.0.0.1 --port=${DB_PORT} --user=root --password=password
+
+.PHONY: ssh-docker-backend
+ssh-docker-backend:
+	@docker run -it --entrypoint "/bin/bash" budgeteer
+
+# Other
 
 .PHONY: build
 build: generate-protos docker-build
