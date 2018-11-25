@@ -3,7 +3,7 @@ package plaid
 import (
 	"strings"
 
-	proto "github.com/colinking/budgeteer/backend/pkg/proto/plaid"
+	"github.com/colinking/budgeteer/backend/pkg/gen/plaidpb"
 	"github.com/plaid/plaid-go/plaid"
 	"google.golang.org/grpc/grpclog"
 )
@@ -36,18 +36,18 @@ func toEnvironment(env string) plaid.Environment {
 }
 
 // ToTransactionType converts a Plaid API transaction type to a proto transaction type.
-func toTransactionType(str string) proto.Transaction_Type {
-	return proto.Transaction_Type(proto.Transaction_Type_value[strings.ToUpper(str)])
+func toTransactionType(str string) plaidpb.Transaction_Type {
+	return plaidpb.Transaction_Type(plaidpb.Transaction_Type_value[strings.ToUpper(str)])
 }
 
 // ToCurrencyType converts a Plaid API currency type to a proto currency type.
-func toCurrencyType(str string) proto.Transaction_Currency {
-	return proto.Transaction_Currency(proto.Transaction_Currency_value[strings.ToUpper(str)])
+func toCurrencyType(str string) plaidpb.Transaction_Currency {
+	return plaidpb.Transaction_Currency(plaidpb.Transaction_Currency_value[strings.ToUpper(str)])
 }
 
 // ToTransactionLocation converts a Plaid API location to a proto location.
-func toTransactionLocation(loc plaid.Location) *proto.Transaction_Location {
-	return &proto.Transaction_Location{
+func toTransactionLocation(loc plaid.Location) *plaidpb.Transaction_Location {
+	return &plaidpb.Transaction_Location{
 		Address:     loc.Address,
 		City:        loc.City,
 		Lat:         loc.Lat,
@@ -59,8 +59,8 @@ func toTransactionLocation(loc plaid.Location) *proto.Transaction_Location {
 }
 
 // ToTransactionPaymentMeta converts a Plaid API payment meta to a proto payment meta.
-func toTransactionPaymentMeta(meta plaid.PaymentMeta) *proto.Transaction_PaymentMeta {
-	return &proto.Transaction_PaymentMeta{
+func toTransactionPaymentMeta(meta plaid.PaymentMeta) *plaidpb.Transaction_PaymentMeta {
+	return &plaidpb.Transaction_PaymentMeta{
 		ByOrderOf:        meta.ByOrderOf,
 		Payee:            meta.Payee,
 		Payer:            meta.Payer,
@@ -72,9 +72,9 @@ func toTransactionPaymentMeta(meta plaid.PaymentMeta) *proto.Transaction_Payment
 	}
 }
 
-// ToTransaction converts a Plaid API transaction to a proto transaction.
-func toTransaction(tx plaid.Transaction) *proto.Transaction {
-	return &proto.Transaction{
+// ToTransaction converts a Plaid API transaction to a plaidpb transaction.
+func toTransaction(tx plaid.Transaction) *plaidpb.Transaction {
+	return &plaidpb.Transaction{
 		Id:                   tx.ID,
 		AccountId:            tx.AccountID,
 		Category:             tx.Category,

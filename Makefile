@@ -18,100 +18,86 @@ MIGRATIONS_PATH := ${BACKEND_PATH}/migrations
 CERT_DIR := ./${BACKEND_PATH}/certs
 CERT_CA_PASSWORD := "very-safe-passw0rd"
 
+DB_USERNAME_LOCAL := root
+DB_PASSWORD_LOCAL := password
+DB_NAME := moss
+
 TAG := latest
 
 .DEFAULT_GOAL := run
 
 # Run
 
-.PHONY: run
-run: build
-	@# TODO: this doesn't work, something to do with the port forwarding...
-	@echo "Running version :${TAG}..."
-	@docker run -it -p ${PORT}:${PORT} budgeteer:${TAG} --name budgeteer
+# .PHONY: run
+# run: build
+# 	@# TODO: this doesn't work, something to do with the port forwarding...
+# 	@echo "Running version :${TAG}..."
+# 	@docker run -it -p ${PORT}:${PORT} budgeteer:${TAG} --name budgeteer
 
-.PHONY: run-local-server
-run-local-server: generate-protos
-	cd ${BACKEND_PATH} && go run cmd/main.go
+.PHONY: gateway
+gateway: build
+	cd ${BACKEND_PATH} && go run cmd/gateway.go
 
-.PHONY: run-local-app
-run-local-app:
+.PHONY: server
+server: build
+	cd ${BACKEND_PATH} && go run cmd/grpc.go
+
+.PHONY: app
+app: build
 	@cd ${FRONTEND_PATH} && yarn start
 
-.PHONY: run-local-db
-run-local-db:
-	docker rm moss-db > /dev/null || true
-	docker run -p ${DB_PORT}:3306 --name moss-db -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=moss mysql:5.6
+.PHONY: db
+db:
+	@docker rm moss-db > /dev/null || true
+	@docker run -p ${DB_PORT}:3306 --name moss-db -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=moss mysql:5.6
 
 # Docker connect
 
-.PHONY: connect-local-db
-connect-local-db:
-	mysql --host=127.0.0.1 --port=${DB_PORT} --user=root --password=password
-
-.PHONY: ssh-docker-backend
-ssh-docker-backend:
+.PHONY: connect-server
+connect-server:
 	@docker run -it --entrypoint "/bin/bash" budgeteer
+
+.PHONY: connect-db
+connect-db: # migratedb-local
+	@mysql --host=127.0.0.1 --port=${DB_PORT} --user=${DB_USERNAME_LOCAL} --password=${DB_PASSWORD_LOCAL} --database=${DB_NAME}
 
 # Database Migrations
 
-$(GOPATH)/bin/migrate:
-	go get -u github.com/golang-migrate/migrate
-	go build -o $(GOPATH)/bin/migrate github.com/golang-migrate/migrate/cli
-
-.PHONY: migratedb
-migratedb-local: $(GOPATH)/bin/migrate
+.PHONY: migrate
+migrate: $(GOPATH)/bin/migrate
 	@migrate -path ${MIGRATIONS_PATH} -database mysql://root:password@tcp\(127.0.0.1:${DB_PORT}\)/moss up
 
 .PHONY: create-migration
 create-migration: $(GOPATH)/bin/migrate
 	@migrate create -dir ${MIGRATIONS_PATH} -ext sql ${MIGRATION}
 
-drop-local-db: $(GOPATH)/bin/migrate
+.PHONY: drop-db
+drop-db: $(GOPATH)/bin/migrate
 	@migrate -path ${MIGRATIONS_PATH} -database mysql://root:password@tcp\(127.0.0.1:${DB_PORT}\)/moss drop
 
-# Other
+# Helpers
 
 .PHONY: build
-build: generate-protos docker-build
-
-.PHONY: deps
-deps:
+build: node_modules .deps
+	@cd proto_ext && prototool generate
+	@cd proto && prototool generate
 	@cd ${BACKEND_PATH} && dep ensure -v
-
-.PHONY: docker-build
-docker-build:
-	cd ${BACKEND_PATH} && docker build -t budgeteer .
-
-.PHONY: logs
-logs:
-	@docker logs redisproxy_proxy_1 --follow
-
-.PHONY: run-app
-run-app: node_modules
-	# TODO: run-app
-	# NODE_ENV=$(ENV) node app/scripts/dev.js
-
-.PHONY: run-api
-run-api:
-	# TODO: run-api
 
 node_modules: package.json yarn.lock
 	yarn
 	@touch $@
 
-.PHONY: install
-install:
-	@cd ${BACKEND_PATH} && dep ensure
+.deps:
+	@go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway && \
+		go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger && \
+		go get -u github.com/golang/protobuf/protoc-gen-go
+	@touch .deps
 
-.PHONY: lint
-lint: node_modules
-	# TODO: set up eslint
-	# $(BIN)/eslint --ignore-path .gitignore '**/*.js' || (touch .circlec
+$(GOPATH)/bin/migrate:
+	@go get -u github.com/golang-migrate/migrate
+	@go build -o $(GOPATH)/bin/migrate github.com/golang-migrate/migrate/cli
 
-.PHONY: generate-protos
-generate-protos:
-	@prototool generate
+# Certs
 
 certs:
 	@# Regenerate the self-signed certificate for local host. Recent versions of firefox and chrome(ium)
@@ -120,10 +106,10 @@ certs:
 	@# Source: https://github.com/improbable-eng/grpc-web/blob/master/misc/gen_cert.sh (based on https://stackoverflow.com/a/48791236)
 
 	@# Generate the root certificate authority key with the set password
-	@openssl genrsa -des3 -passout pass:$CERT_CA_PASSWORD -out ${CERT_DIR}/localhostCA.key 2048
+	@openssl genrsa -des3 -passout pass:${CERT_CA_PASSWORD} -out ${CERT_DIR}/localhostCA.key 2048
 
 	@# Generate a root-certificate based on the root-key for importing to browsers.
-	@openssl req -x509 -new -nodes -key ${CERT_DIR}/localhostCA.key -passin pass:$CERT_CA_PASSWORD -config ${CERT_DIR}/localhostCA.conf -sha256 -days 1825 -out ${CERT_DIR}/localhostCA.pem
+	@openssl req -x509 -new -nodes -key ${CERT_DIR}/localhostCA.key -passin pass:${CERT_CA_PASSWORD} -config ${CERT_DIR}/localhostCA.conf -sha256 -days 1825 -out ${CERT_DIR}/localhostCA.pem
 
 	@# Generate a new private key
 	@openssl genrsa -out ${CERT_DIR}/localhost.key 2048
@@ -133,21 +119,10 @@ certs:
 
 	@# Create the certificate for the webserver to serve using the localhost.conf config
 	@openssl x509 -req -in ${CERT_DIR}/localhost.csr -CA ${CERT_DIR}/localhostCA.pem -CAkey ${CERT_DIR}/localhostCA.key -CAcreateserial \
-	-out ${CERT_DIR}/localhost.crt -days 1024 -sha256 -extfile ${CERT_DIR}/localhost.conf -passin pass:$CERT_CA_PASSWORD
+	-out ${CERT_DIR}/localhost.crt -days 1024 -sha256 -extfile ${CERT_DIR}/localhost.conf -passin pass:${CERT_CA_PASSWORD}
 
 .PHONY: install-cert-mac
 install-cert-mac:
 	@echo "Installing localhost cert to System keychain..."
 	@sudo security add-trusted-cert -d -r trustRoot -k "/Library/Keychains/System.keychain" ${CERT_DIR}/localhostCA.pem
 	@echo "Installed."
-
-gin:
-	gin --port ${GIN_PORT} --appPort ${PORT} --path ${BACKEND_PATH}/cmd --all ${BACKEND_PATH}/cmd/main.go --certFile "${CERT_DIR}/localhostCA.pem" --keyFile "${CERT_DIR}/localhostCA.key"
-
-.PHONY: grpc-repl-plaid
-grpc-repl-plaid:
-	@grpcc -p ${PROTO_DEF_PATH}/plaid/plaid_service.proto -a localhost:${PORT} --root_cert "${CERT_DIR}/localhostCA.pem" 2>/dev/null
-
-.PHONY: grpc
-grpc:
-	@grpcc -p ${PROTO_DEF_PATH}/plaid/plaid_service.proto -a localhost:${PORT} --eval 'client.exchangeToken({ token: "public-sandbox-8d294b2d-79bf-4a05-bb9a-aaa87776264c" }, printReply)' --root_cert "${CERT_DIR}/localhostCA.pem"

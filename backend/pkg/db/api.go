@@ -1,27 +1,24 @@
 package db
 
-// Plaid stores metadata about a user's plaid account.
-type Plaid struct {
-	AccessToken string
+type UpsertUserInput struct {
+	AuthID     string
+	FirstName  string
+	LastName   string
+	Email      string
+	PictureURL string
 }
 
-// User stores metadata about one user account.
-type User struct {
-	ID        string
-	FirstName string
-	LastName  string
-	Email     string
-	Plaid     *Plaid
+type UpsertUserOutput struct {
+	IsNew bool
 }
 
 // Database stores a DB connection.
 type Database interface {
 	// User API
-	StoreUser(u *User)
-	GetUser(userID string) *User
-	GetUserByEmail(email string) *User
+	GetUserByID(authID string) *User
+	UpsertUser(input *UpsertUserInput) *UpsertUserOutput
 
 	// User.Plaid API
-	SaveToken(userID string, token string)
-	GetToken(userID string) (token string)
+	SaveToken(authID string, token string)
+	GetToken(authID string) (token string)
 }

@@ -7,7 +7,7 @@
     "@types/lodash": "^4.14.117",
     "auth0-js": "^9.8.0",
     "concurrently": "^4.0.1",
-    "evergreen-ui": "^4.0.0-37",
+    "evergreen-ui": "^4.5.0",
     "google-protobuf": "^3.6.1",
     "ianstormtaylor-reset": "^0.2.0",
     "lint-staged": "^7.3.0",

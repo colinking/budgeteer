@@ -1,0 +1,36 @@
+# excludes:
+#   - node_modules
+#   - backend/vendor
+#   - frontend/node_modules
+
+protoc:
+  version: 3.6.1
+  includes:
+    - ../proto_ext
+    - ../proto_ext/third_party/googleapis
+
+generate:
+
+  go_options:
+    extra_modifiers:
+      google/api/annotations.proto: google.golang.org/genproto/googleapis/api/annotations
+      google/api/http.proto: google.golang.org/genproto/googleapis/api/annotations
+    import_path: github.com/colinking/budgeteer/proto
+
+  plugins:
+    - name: go
+      flags: plugins=grpc
+      output: ../backend/pkg/gen
+
+    - name: grpc-gateway
+      type: go
+      output: ../backend/pkg/gen
+
+    - name: ts
+      output: ../frontend/src/gen
+      flags: service=true
+      path: ../node_modules/.bin/protoc-gen-ts
+
+    - name: js
+      output: ../frontend/src/gen
+      flags: import_style=commonjs,binary

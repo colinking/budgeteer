@@ -1,14 +1,14 @@
 import * as React from 'react'
 
-import { getHost, getMetadata } from '../../lib/requests'
 import {
   ExchangeTokenRequest,
   ExchangeTokenResponse
-} from '../../proto/plaid/plaid_service_pb'
+} from '../../gen/plaidpb/plaid_service_pb'
 import {
   PlaidClient,
   ServiceError
-} from '../../proto/plaid/plaid_service_pb_service'
+} from '../../gen/plaidpb/plaid_service_pb_service'
+import { getHost, getMetadata } from '../../lib/requests'
 import SettingsComponent from './Settings'
 
 const plaidEnv = process.env.REACT_APP_PLAID_ENV as string

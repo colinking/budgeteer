@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package user;
+option go_package = "userpb";
+
+import "google/api/annotations.proto";
+
+message User {
+    string id = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string email = 4;
+    string pictureURL = 5;
+}
+
+message LoginRequest {
+    User user = 1;
+}
+
+message LoginResponse {
+    // Whether this is a new user or not.
+    bool new = 1;
+}
+
+service UserService {
+    rpc Login(LoginRequest) returns (LoginResponse) {
+        option (google.api.http) = {
+            post: "/v1/user/login"
+            body: "*"
+        };
+    }
+}

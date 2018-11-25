@@ -16,3 +16,5 @@ client/.wwp-cache
 certs
 .env
 .srl
+.deps
+gen

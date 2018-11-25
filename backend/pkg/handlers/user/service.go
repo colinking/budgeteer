@@ -1,29 +1,37 @@
 package user
 
 import (
+	"github.com/colinking/budgeteer/backend/pkg/auth"
 	"github.com/colinking/budgeteer/backend/pkg/db"
-	proto "github.com/colinking/budgeteer/backend/pkg/proto/user"
-	"github.com/go-chi/jwtauth"
+	"github.com/colinking/budgeteer/backend/pkg/gen/userpb"
 	"golang.org/x/net/context"
+	"google.golang.org/grpc/grpclog"
 )
 
 // Service contains all User-related handlers.
 type Service struct {
-	db     db.Database
+	db db.Database
 }
 
-func getAuthId(ctx context.Context) (string) {
-	_, claims, _ := jwtauth.FromContext(ctx)
-	return claims["sub"].(string)
-}
+func (s Service) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.LoginResponse, error) {
+	// TODO: move out to auth-ed middleware
+	authID, err := auth.GetAuthId(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-func (s Service) UserLogin(ctx context.Context, req *proto.UserLoginRequest) (*proto.UserLoginResponse, error) {
-	// Get user by auth0 user id
-	// TODO: actually implement by querying DB
-	getAuthId(ctx)
+	grpclog.Infof("Received request from: %s\n", authID)
 
-	return &proto.UserLoginResponse{
-		New: true,
+	resp := s.db.UpsertUser(&db.UpsertUserInput{
+		AuthID:     authID,
+		FirstName:  req.User.FirstName,
+		LastName:   req.User.LastName,
+		PictureURL: req.User.PictureURL,
+		Email:      req.User.Email,
+	})
+
+	return &userpb.LoginResponse{
+		New: resp.IsNew,
 	}, nil
 }
 
@@ -33,12 +41,11 @@ type ServiceConfig struct {
 }
 
 // Validate implementation of proto interface.
-var _ proto.UserServiceServer = &Service{}
+var _ userpb.UserServiceServer = &Service{}
 
 // New returns a new instance of a Plaid service client.
 func New(c *ServiceConfig) *Service {
 	return &Service{
-		db:     c.Database,
+		db: c.Database,
 	}
 }
-

@@ -1,11 +1,12 @@
 import * as React from 'react'
 
-import { majorScale, Pane } from 'evergreen-ui'
+import { majorScale, minorScale, Pane, Text } from 'evergreen-ui'
 import { RouteComponentProps, withRouter } from 'react-router-dom'
 
 import withUser from '../../hoc/withUser'
 import { User } from '../../lib/auth'
-import TabbedSubNav, { TabItem } from '../TabbedSubNav/TabbedSubNav'
+import TabbedSubNav, { TabItem } from './TabbedSubNav/TabbedSubNav'
+import UserMenu from './UserMenu'
 
 export declare interface NavBarProps extends RouteComponentProps<any> {
   user?: User
@@ -39,13 +40,28 @@ class NavBar extends React.Component<NavBarProps> {
       <Pane background="white" elevation={0}>
         <Pane display="flex" height={majorScale(7)}>
           <Pane
+            flexBasis={majorScale(30)}
+            display="flex"
+            alignItems="center"
+            paddingLeft={minorScale(3)}
+          />
+          <Pane
             className="fade-in-simple"
             flex={1}
             display="flex"
             justifyContent="center"
             alignItems="center"
           >
-            moss (pre-alpha ya)
+            <Text>~ moss ~</Text>
+          </Pane>
+          <Pane
+            paddingRight={minorScale(3)}
+            flexBasis={majorScale(30)}
+            display="flex"
+            alignItems="center"
+            justifyContent="flex-end"
+          >
+            {this.props.user && <UserMenu user={this.props.user} />}
           </Pane>
         </Pane>
         <Pane
