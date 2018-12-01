@@ -5,8 +5,8 @@ import { RouteComponentProps, withRouter } from 'react-router-dom'
 
 import withUser from '../../hoc/withUser'
 import { User } from '../../lib/auth'
+import AvatarMenu from './AvatarMenu'
 import TabbedSubNav, { TabItem } from './TabbedSubNav/TabbedSubNav'
-import UserMenu from './UserMenu'
 
 export declare interface NavBarProps extends RouteComponentProps<any> {
   user?: User
@@ -27,14 +27,6 @@ class NavBar extends React.Component<NavBarProps> {
         visible: true
       }
     ]
-
-    if (this.props.user) {
-      items.push({
-        href: '/logout',
-        name: `Logout (${this.props.user.firstName})`,
-        visible: true
-      })
-    }
 
     return (
       <Pane background="white" elevation={0}>
@@ -61,7 +53,7 @@ class NavBar extends React.Component<NavBarProps> {
             alignItems="center"
             justifyContent="flex-end"
           >
-            {this.props.user && <UserMenu user={this.props.user} />}
+            {this.props.user && <AvatarMenu user={this.props.user} />}
           </Pane>
         </Pane>
         <Pane

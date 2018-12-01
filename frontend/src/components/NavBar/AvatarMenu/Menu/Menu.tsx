@@ -1,4 +1,4 @@
-import { Heading, majorScale, Menu as EvergreenMenu, Pane, Text } from 'evergreen-ui'
+import { Heading, majorScale, Menu as EvergreenMenu, Pane, Text, defaultTheme } from 'evergreen-ui'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { User } from '../../../../lib/auth'
@@ -16,9 +16,9 @@ export default class Menu extends React.Component<MenuProps> {
         <Pane
           padding={majorScale(2)}
           maxWidth={majorScale(30)}
-          // backgroundColor={defaultTheme.scales.neutral.N1A}
+          backgroundColor={defaultTheme.scales.neutral.N1A}
         >
-          <Heading is="h3">{props.user.firstName}</Heading>
+          <Heading is="h3">{props.user.fullName}</Heading>
           <Pane>
             <Text>{props.user.email}</Text>
           </Pane>
@@ -27,8 +27,8 @@ export default class Menu extends React.Component<MenuProps> {
         <EvergreenMenu.Divider />
 
         <EvergreenMenu.Group>
-          <EvergreenMenu.Item is={Link} href="/logout" rel="external">
-            Logout
+          <EvergreenMenu.Item is={Link} to="/logout" rel="external">
+            <Text>Logout</Text>
           </EvergreenMenu.Item>
         </EvergreenMenu.Group>
       </EvergreenMenu>

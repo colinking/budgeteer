@@ -9,6 +9,7 @@ export declare interface User {
   auth_id: string
   firstName: string
   lastName: string
+  fullName: string
   email: string
   picture: string
 }
@@ -102,6 +103,7 @@ export async function getLoggedInUser(): Promise<User> {
     auth_id: authUser.sub!,
     email: authUser.email!,
     firstName: authUser.given_name!,
+    fullName: authUser.name,
     picture: authUser.picture,
     lastName: authUser.family_name!
   }
