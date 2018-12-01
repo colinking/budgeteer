@@ -27,7 +27,7 @@ const auth = new auth0.WebAuth({
   scope: 'openid profile email'
 })
 
-const parseHash = tp.promisify<ParseHashOptions, Auth0DecodedHash>(
+const parseHash = tp.promisify<ParseHashOptions, Auth0DecodedHash | null>(
   auth.parseHash,
   auth
 )
@@ -41,6 +41,10 @@ const userInfo = tp.promisify<string, Auth0UserProfile>(
  */
 export async function handleAuthenticationCallback(hash: string) {
   const authResult = await parseHash({ hash })
+
+  if (!authResult) {
+    return Promise.reject("Invalid authentication metadata. Unable to parse")
+  }
 
   // Set the time that the access token will expire at.
   const expiresAt = JSON.stringify(

@@ -78,12 +78,12 @@ drop-db: $(GOPATH)/bin/migrate
 # Helpers
 
 .PHONY: build
-build: node_modules .deps
+build: ${FRONTEND_PATH}/node_modules .deps
 	@cd proto_ext && prototool generate
 	@cd proto && prototool generate
 	@cd ${BACKEND_PATH} && dep ensure -v
 
-node_modules: package.json yarn.lock
+${FRONTEND_PATH}/node_modules: ${FRONTEND_PATH}/package.json ${FRONTEND_PATH}/yarn.lock
 	yarn
 	@touch $@
 

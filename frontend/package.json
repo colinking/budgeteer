@@ -1,19 +1,33 @@
 {
   "name": "budgeteer",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.0.1",
+  "description": "✨ Make Budget Management Magical 🎩",
+  "repository": "ssh://git@github.com/colinking/budgeteer.git",
+  "author": "Colin King <me@colinking.co>",
+  "license": "MIT",
+  "scripts": {
+    "precommit": "lint-staged",
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx,json,css}": [
+      "prettier --single-quote --write",
+      "tslint --fix -c tslint.prod.json",
+      "git add"
+    ]
+  },
   "dependencies": {
-    "@types/auth0-js": "^8.11.6",
-    "@types/lodash": "^4.14.117",
     "auth0-js": "^9.8.0",
     "concurrently": "^4.0.1",
     "evergreen-ui": "^4.5.0",
     "google-protobuf": "^3.6.1",
+    "grpc-web-client": "^0.7.0",
     "ianstormtaylor-reset": "^0.2.0",
-    "lint-staged": "^7.3.0",
     "lodash": "^4.17.11",
     "nodemon": "^1.18.4",
     "normalize": "^0.3.1",
+    "normalize.css": "^8.0.1",
     "prettier": "^1.14.3",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
@@ -23,35 +37,24 @@
     "react-virtualized": "^9.20.1",
     "typed-promisify": "^0.4.0"
   },
-  "scripts": {
-    "precommit": "lint-staged",
-    "start": "react-scripts-ts start",
-    "build": "react-scripts-ts build",
-    "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject",
-    "storybook": "NODE_PATH=src start-storybook -p 6006",
-    "build-storybook": "build-storybook"
-  },
-  "lint-staged": {
-    "src/**/*.{ts,tsx,js,jsx,json,css}": [
-      "prettier --single-quote --write",
-      "tslint --fix",
-      "git add"
-    ]
-  },
   "devDependencies": {
-    "@storybook/addon-actions": "^3.4.10",
-    "@storybook/addon-links": "^3.4.10",
-    "@storybook/addons": "^3.4.10",
-    "@storybook/react": "^3.4.10",
+    "@types/auth0-js": "^8.11.7",
     "@types/google-protobuf": "^3.2.7",
     "@types/jest": "^23.3.1",
+    "@types/lodash": "^4.14.118",
     "@types/node": "^10.9.4",
     "@types/react": "^16.4.13",
     "@types/react-dom": "^16.0.7",
     "@types/react-router-dom": "^4.3.0",
     "babel-core": "^6.26.3",
     "babel-runtime": "^6.26.0",
+    "lint-staged": "^8.1.0",
+    "ts-protoc-gen": "^0.8.0",
     "typescript": "^3.0.3"
+  },
+  "linterOptions": {
+    "exclude": [
+      "src/gen/*"
+    ]
   }
 }

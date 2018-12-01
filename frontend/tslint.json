@@ -8,6 +8,7 @@
       "src/gen/**/*"
     ]
   },
+  "defaultSeverity": "warning",
   "rules": {
     "no-console": {
       "severity": "warning"
@@ -22,6 +23,7 @@
       "options": "never"
     },
     "object-literal-sort-keys": false,
-    "semicolon": [true, "never"]
+    "semicolon": [true, "never"],
+    "ordered-imports": false
   }
 }

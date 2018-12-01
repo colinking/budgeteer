@@ -27,7 +27,9 @@ class LoginApp extends React.Component<RouteComponentProps<any>, LoginState> {
     const hash = this.props.location.hash
     if (/access_token|id_token|error/.test(hash)) {
       try {
-        await handleAuthenticationCallback(hash)
+        await handleAuthenticationCallback(hash).catch(err => {
+          throw err
+        })
       } catch (err) {
         this.setState({
           error: {
