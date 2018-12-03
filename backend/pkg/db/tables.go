@@ -26,8 +26,7 @@ type User struct {
 	AuthID string `gorm:"not null;unique;primary_key"`
 
 	// User Data
-	FirstName  string
-	LastName   string
+	Name       string
 	Email      string `gorm:"not null"`
 	PictureURL string
 
@@ -35,8 +34,10 @@ type User struct {
 	Items []Item
 }
 
+// Item stores metadata about a Plaid Item.
 type Item struct {
 	gorm.Model
-	PlaidId          string `gorm:"not null;unique"`
-	PlaidAccessToken string `gorm:"not null;unique"`
+	PlaidId          string `gorm:"not null"`
+	PlaidAccessToken string `gorm:"not null"`
+	UserAuthID       string
 }

@@ -1,15 +1,10 @@
 import * as React from 'react'
 
-import {
-  ExchangeTokenRequest,
-  ExchangeTokenResponse
-} from '../../gen/plaidpb/plaid_service_pb'
-import {
-  PlaidClient,
-  ServiceError
-} from '../../gen/plaidpb/plaid_service_pb_service'
-import { getHost, getMetadata } from '../../lib/requests'
+import clients from '../../lib/clients'
+import { getMetadata } from '../../lib/requests'
 import SettingsComponent from './Settings'
+import { AddItemRequest, AddItemResponse } from '../../gen/userpb/user_service_pb';
+import { ServiceError } from '../../gen/userpb/user_service_pb_service'
 
 const plaidEnv = process.env.REACT_APP_PLAID_ENV as string
 const plaidPublicKey = process.env.REACT_APP_PLAID_PUBLIC_KEY as string
@@ -32,20 +27,20 @@ export default class Settings extends React.Component<SettingsProps> {
     console.log('Successfully authenticated user:')
     console.log(token)
     console.log(metadata)
-    const req = new ExchangeTokenRequest()
+    const req = new AddItemRequest()
     req.setToken(token)
     console.log(req)
-    new PlaidClient(getHost()).exchangeToken(
+    clients.users.addItem(
       req,
       getMetadata(),
       (
         error: ServiceError | null,
-        responseMessage: ExchangeTokenResponse | null
+        resp: AddItemResponse | null
       ) => {
         if (error) {
           throw error
         }
-        const resp = responseMessage as ExchangeTokenResponse
+        resp = resp as AddItemResponse
         console.log(resp.getAccessToken())
         console.log(resp.getItemId())
       }

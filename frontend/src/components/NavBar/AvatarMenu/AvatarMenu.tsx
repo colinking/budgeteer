@@ -11,7 +11,7 @@ export default class AvatarMenu extends React.Component<AvatarMenuProps> {
   public render() {
     const props = this.props
     const avatarProps = {
-      name: props.user.fullName,
+      name: props.user.name,
       src: props.user.picture
     }
 

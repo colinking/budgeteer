@@ -36,11 +36,11 @@ TAG := latest
 
 .PHONY: gateway
 gateway: build
-	cd ${BACKEND_PATH} && go run cmd/gateway.go
+	cd ${BACKEND_PATH} && go run cmd/gateway/gateway.go
 
 .PHONY: server
 server: build
-	cd ${BACKEND_PATH} && go run cmd/grpc.go
+	cd ${BACKEND_PATH} && go run cmd/grpc/grpc.go
 
 .PHONY: app
 app: build

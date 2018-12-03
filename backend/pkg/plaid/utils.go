@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/grpclog"
 )
 
-func newClient(clientID, publicKey, secret, env string) *plaid.Client {
+func New(clientID, publicKey, secret, env string) *plaid.Client {
 	client, err := plaid.NewClient(plaid.ClientOptions{
 		ClientID:    clientID,
 		Secret:      secret,
@@ -73,7 +73,7 @@ func toTransactionPaymentMeta(meta plaid.PaymentMeta) *plaidpb.Transaction_Payme
 }
 
 // ToTransaction converts a Plaid API transaction to a plaidpb transaction.
-func toTransaction(tx plaid.Transaction) *plaidpb.Transaction {
+func ToTransaction(tx plaid.Transaction) *plaidpb.Transaction {
 	return &plaidpb.Transaction{
 		Id:                   tx.ID,
 		AccountId:            tx.AccountID,

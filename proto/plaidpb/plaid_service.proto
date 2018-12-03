@@ -3,22 +3,12 @@ syntax = "proto3";
 package plaid;
 option go_package = "plaidpb";
 
-service Plaid {
-  rpc ExchangeToken (ExchangeTokenRequest) returns (ExchangeTokenResponse);
+import "google/api/annotations.proto";
+
+service PlaidService {
+  // Old endpoints for experimentation. TODO: Remove or implement.
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse);
-}
-
-// ExchangeToken
-
-message ExchangeTokenRequest {
-  string user_id = 1;
-  string token = 2;
-}
-
-message ExchangeTokenResponse {
-  string access_token = 1;
-  string item_id = 2;
 }
 
 // GetTransactions

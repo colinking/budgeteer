@@ -9,10 +9,9 @@ import (
 	"github.com/colinking/budgeteer/backend/pkg/auth"
 	"github.com/colinking/budgeteer/backend/pkg/db"
 	"github.com/colinking/budgeteer/backend/pkg/db/mysql"
-	"github.com/colinking/budgeteer/backend/pkg/gen/plaidpb"
 	"github.com/colinking/budgeteer/backend/pkg/gen/userpb"
-	"github.com/colinking/budgeteer/backend/pkg/handlers/plaid"
 	"github.com/colinking/budgeteer/backend/pkg/handlers/user"
+	"github.com/colinking/budgeteer/backend/pkg/plaid"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
@@ -44,15 +43,10 @@ type Config struct {
 
 // registerEndpoints registers all API endpoints for a given gRPC server.
 func registerEndpoints(server *grpc.Server, c Config, db db.Database) {
-	plaidpb.RegisterPlaidServer(server, plaid.New(&plaid.ServiceConfig{
-		ClientID:  c.PlaidClientID,
-		PublicKey: c.PlaidPublicKey,
-		Secret:    c.PlaidSecret,
-		Env:       c.PlaidEnv,
-		Database:  db,
-	}))
+	plaidClient := plaid.New(c.PlaidClientID, c.PlaidPublicKey, c.PlaidSecret, c.PlaidEnv)
 	userpb.RegisterUserServiceServer(server, user.New(&user.ServiceConfig{
 		Database: db,
+		Client:   plaidClient,
 	}))
 }
 

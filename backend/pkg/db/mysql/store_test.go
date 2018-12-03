@@ -17,10 +17,44 @@ func setup(t *testing.T) *Database {
 		t.Fatalf("failed to boot gorm: %s", err)
 	}
 
-	db.Migrate(d)
+	d.DropTableIfExists("users")
+	d.DropTableIfExists("items")
+
+	Migrate(d)
+
+	// Add some sample data.
+	user := &db.User{
+		AuthID: "1",
+		Name:   "Colin King",
+		Email:  "me@colinking.co",
+	}
+	d.Save(user)
 
 	return &Database{
 		db: d,
+	}
+}
+
+func TestAddItem(t *testing.T) {
+	d := setup(t)
+	defer d.db.Close()
+
+	out := d.AddItem(&db.AddItemInput{
+		AuthID:           "1",
+		PlaidID:          "id-1",
+		PlaidAccessToken: "token-1",
+	})
+	if out.IsNew != true {
+		t.Fatalf("new item is not unique")
+	}
+
+	user := d.GetUserByID("1")
+	if len(user.Items) != 1 {
+		t.Fatalf("user not updated with new item")
+	}
+
+	if user.Items[0].PlaidId != "id-1" {
+		t.Fatalf("user not updated with correct item")
 	}
 }
 
@@ -29,45 +63,32 @@ func TestUpsertUser(t *testing.T) {
 	defer d.db.Close()
 
 	newUser := &db.UpsertUserInput{
-		AuthID:    "1",
-		FirstName: "Colin",
-		LastName:  "King",
-		Email:     "me@colinking.co",
+		AuthID: "2",
+		Name:   "Kyle King",
+		Email:  "kyle@king.co",
 	}
 
 	if d.UpsertUser(newUser).IsNew != true {
-		t.Errorf("new user should be unique")
+		t.Fatalf("new user should be unique")
 	}
 
 	updatedUser := &db.UpsertUserInput{
-		AuthID:    "1",
-		FirstName: "Colin",
-		LastName:  "King",
-		Email:     "new@email.com",
+		AuthID: "2",
+		Name:   "Kyle King",
+		Email:  "new@email.com",
 	}
 
 	if d.UpsertUser(updatedUser).IsNew != false {
-		t.Errorf("updated user should not be unique")
+		t.Fatalf("updated user should not be unique")
 	}
 
 	otherUser := &db.UpsertUserInput{
-		AuthID:    "2",
-		FirstName: "John",
-		LastName:  "Doe",
-		Email:     "john@email.com",
+		AuthID: "3",
+		Name:   "John Doe",
+		Email:  "john@email.com",
 	}
 
 	if d.UpsertUser(otherUser).IsNew != true {
-		t.Errorf("other user should be unique")
+		t.Fatalf("other u ser should be unique")
 	}
 }
-
-//func TestSaveToken(t *testing.T) {
-//	d := setup(t)
-//	token := "hello world"
-//	d.SaveToken("1234", token)
-//
-//	if d.GetToken("1234") != token {
-//		t.Errorf("Invalid token returned")
-//	}
-//}

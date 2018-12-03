@@ -20,6 +20,31 @@ type Database struct {
 	db *gorm.DB
 }
 
+func (d *Database) AddItem(input *db.AddItemInput) *db.AddItemOutput {
+	tx := d.db.Begin()
+
+	// Create the new Plaid Item.
+	item := &db.Item{
+		PlaidId:          input.PlaidID,
+		PlaidAccessToken: input.PlaidAccessToken,
+	}
+	tx.Save(item)
+
+	// Add the Item to the current user.
+	user := &db.User{
+		AuthID: input.AuthID,
+	}
+	tx.First(user)
+	user.Items = append(user.Items, *item)
+	tx.Save(user)
+
+	tx.Commit()
+
+	return &db.AddItemOutput{
+		IsNew: true,
+	}
+}
+
 func (d *Database) UpsertUser(input *db.UpsertUserInput) *db.UpsertUserOutput {
 	user := &db.User{
 		AuthID: input.AuthID,
@@ -35,8 +60,7 @@ func (d *Database) UpsertUser(input *db.UpsertUserInput) *db.UpsertUserOutput {
 	// Upsert any new profile information.
 	tx.First(&user)
 	user.Email = input.Email
-	user.FirstName = input.FirstName
-	user.LastName = input.LastName
+	user.Name = input.Name
 	user.PictureURL = input.PictureURL
 
 	tx.Save(&user)
@@ -48,15 +72,13 @@ func (d *Database) UpsertUser(input *db.UpsertUserInput) *db.UpsertUserOutput {
 }
 
 func (d *Database) GetUserByID(authID string) *db.User {
-	panic("implement me")
-}
+	user := &db.User{
+		AuthID: authID,
+	}
 
-func (d *Database) SaveToken(authID string, token string) {
-	panic("implement me")
-}
+	d.db.Preload("Items").First(&user)
 
-func (d *Database) GetToken(authID string) (token string) {
-	panic("implement me")
+	return user
 }
 
 // New initializes a new DynamoDB database connection.

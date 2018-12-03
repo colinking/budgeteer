@@ -18,7 +18,7 @@ export default class Menu extends React.Component<MenuProps> {
           maxWidth={majorScale(30)}
           backgroundColor={defaultTheme.scales.neutral.N1A}
         >
-          <Heading is="h3">{props.user.fullName}</Heading>
+          <Heading is="h3">{props.user.name}</Heading>
           <Pane>
             <Text>{props.user.email}</Text>
           </Pane>

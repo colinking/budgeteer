@@ -14,4 +14,6 @@ func Migrate(d *gorm.DB) {
 
 	// TODO: move to a better migration tool: https://github.com/go-gormigrate/gormigrate
 	d.Model(db.User{}).RemoveIndex("email")
+	d.Model(db.Item{}).RemoveIndex("plaid_id")
+	d.Model(db.Item{}).RemoveIndex("plaid_access_token")
 }

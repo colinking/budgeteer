@@ -2,13 +2,22 @@ package db
 
 type UpsertUserInput struct {
 	AuthID     string
-	FirstName  string
-	LastName   string
+	Name       string
 	Email      string
 	PictureURL string
 }
 
 type UpsertUserOutput struct {
+	IsNew bool
+}
+
+type AddItemInput struct {
+	AuthID           string
+	PlaidID          string
+	PlaidAccessToken string
+}
+
+type AddItemOutput struct {
 	IsNew bool
 }
 
@@ -18,7 +27,5 @@ type Database interface {
 	GetUserByID(authID string) *User
 	UpsertUser(input *UpsertUserInput) *UpsertUserOutput
 
-	// User.Plaid API
-	SaveToken(authID string, token string)
-	GetToken(authID string) (token string)
+	AddItem(input *AddItemInput) *AddItemOutput
 }

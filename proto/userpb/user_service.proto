@@ -5,28 +5,52 @@ option go_package = "userpb";
 
 import "google/api/annotations.proto";
 
-message User {
-    string id = 1;
-    string firstName = 2;
-    string lastName = 3;
-    string email = 4;
-    string pictureURL = 5;
-}
-
-message LoginRequest {
-    User user = 1;
-}
-
-message LoginResponse {
-    // Whether this is a new user or not.
-    bool new = 1;
-}
-
 service UserService {
+    // Called whenever a user signs into budgeteer.
     rpc Login(LoginRequest) returns (LoginResponse) {
         option (google.api.http) = {
             post: "/v1/user/login"
             body: "*"
         };
     }
+
+    // Called when a user authenticates a new item.
+    rpc AddItem(AddItemRequest) returns (AddItemResponse) {
+        option (google.api.http) = {
+            post: "/v1/user/item"
+            body: "*"
+        };
+    }
+}
+
+// Login
+
+message LoginRequest {
+    User user = 1;
+}
+
+message LoginResponse {
+    // Whether or not this is a new user.
+    bool new = 1;
+}
+
+// AddItem
+
+message AddItemRequest {
+    string token = 1;
+}
+
+message AddItemResponse {
+    string access_token = 1;
+    string item_id = 2;
+    bool new = 3;
+}
+
+// General Types
+
+message User {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string pictureURL = 4;
 }
