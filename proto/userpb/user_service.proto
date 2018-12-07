@@ -51,9 +51,9 @@ message AddItemRequest {
 }
 
 message AddItemResponse {
-    string access_token = 1;
-    string item_id = 2;
-    bool new = 3;
+    // Whether or not this is a new item.
+    bool new = 1;
+    User user = 2;
 }
 
 // Get
@@ -78,4 +78,19 @@ message User {
 message Item {
     string id = 1;
     string access_token = 2;
+    repeated Account accounts = 3;
+}
+
+message Account {
+    string id = 1;
+    string mask = 2;
+    string name = 3;
+    string officialName = 4;
+    string subtype = 5;
+    string type = 6;
+
+    double availableBalance = 7;
+    double currentBalance = 8;
+    double limit = 9;
+    string currency = 10;
 }

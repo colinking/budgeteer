@@ -41,8 +41,7 @@ export default class Settings extends React.Component<SettingsProps> {
           throw error
         }
         resp = resp as AddItemResponse
-        console.log(resp.getAccessToken())
-        console.log(resp.getItemId())
+        console.log(resp.getUser())
       }
     )
   }

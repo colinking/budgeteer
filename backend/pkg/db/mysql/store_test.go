@@ -21,6 +21,7 @@ func setup(t *testing.T) *Database {
 	// Clear previous table (if run against on-disk sqlite)
 	d.DropTableIfExists("users")
 	d.DropTableIfExists("items")
+	d.DropTableIfExists("accounts")
 
 	Migrate(d)
 
@@ -31,8 +32,14 @@ func setup(t *testing.T) *Database {
 		Email:  "me@colinking.co",
 		Items: []db.Item{
 			{
-				PlaidId:          "plaid-id-1",
-				PlaidAccessToken: "plaid-token-1",
+				PlaidId:          "item-id-1",
+				PlaidAccessToken: "item-token-1",
+				Accounts: []db.Account{
+					{
+						Name:    "account-name-1",
+						PlaidId: "account-id-1",
+					},
+				},
 			},
 		},
 	}
@@ -62,6 +69,8 @@ func TestGetUser(t *testing.T) {
 	require.Equal(t, "1", user.User.AuthID)
 	require.Equal(t, "me@colinking.co", user.User.Email)
 	require.Len(t, user.User.Items, 1)
+	require.Len(t, user.User.Items[0].Accounts, 1)
+	require.Equal(t, "account-id-1", user.User.Items[0].Accounts[0].PlaidId)
 }
 
 func TestGetUserNonExistent(t *testing.T) {
@@ -83,12 +92,12 @@ func TestAddItem(t *testing.T) {
 		ID: "1",
 	})
 	require.Len(t, user.User.Items, 1)
-	require.Equal(t, "plaid-id-1", user.User.Items[0].PlaidId)
+	require.Equal(t, "item-id-1", user.User.Items[0].PlaidId)
 
 	out := d.AddItem(&db.AddItemInput{
 		AuthID:           "1",
-		PlaidID:          "plaid-id-2",
-		PlaidAccessToken: "plaid-token-2",
+		PlaidID:          "item-id-2",
+		PlaidAccessToken: "item-token-2",
 	})
 	require.Equal(t, true, out.IsNew)
 
@@ -96,8 +105,8 @@ func TestAddItem(t *testing.T) {
 		ID: "1",
 	})
 	require.Len(t, user.User.Items, 2)
-	require.Equal(t, "plaid-id-1", user.User.Items[0].PlaidId)
-	require.Equal(t, "plaid-id-2", user.User.Items[1].PlaidId)
+	require.Equal(t, "item-id-1", user.User.Items[0].PlaidId)
+	require.Equal(t, "item-id-2", user.User.Items[1].PlaidId)
 }
 
 func TestUpsertUser(t *testing.T) {
@@ -117,4 +126,42 @@ func TestUpsertUser(t *testing.T) {
 		Email:  "new@email.com",
 	}
 	require.Equal(t, false, d.UpsertUser(updatedUser).IsNew)
+}
+
+func TestAddAccounts(t *testing.T) {
+	d := setup(t)
+	defer d.db.Close()
+
+	out := d.AddAccounts(&db.AddAccountsInput{
+		ItemID:   "item-id-1",
+		Accounts: []db.Account{},
+	})
+	require.NotNil(t, out.User)
+	require.Len(t, out.User.Items, 1)
+	require.Len(t, out.User.Items[0].Accounts, 1)
+
+	out = d.AddAccounts(&db.AddAccountsInput{
+		ItemID: "item-id-1",
+		Accounts: []db.Account{
+			{
+				Name:    "account-name-2",
+				PlaidId: "account-id-2",
+			},
+			{
+				Name:    "account-name-3",
+				PlaidId: "account-id-3",
+			},
+		},
+	})
+	require.Len(t, out.User.Items, 1)
+	require.Len(t, out.User.Items[0].Accounts, 3)
+	account1 := out.User.Items[0].Accounts[0]
+	account2 := out.User.Items[0].Accounts[1]
+	account3 := out.User.Items[0].Accounts[2]
+	require.Equal(t, "account-name-1", account1.Name)
+	require.Equal(t, "account-name-2", account2.Name)
+	require.Equal(t, "account-name-3", account3.Name)
+	require.Equal(t, "account-id-1", account1.PlaidId)
+	require.Equal(t, "account-id-2", account2.PlaidId)
+	require.Equal(t, "account-id-3", account3.PlaidId)
 }

@@ -6,9 +6,9 @@ import (
 	"github.com/colinking/budgeteer/backend/pkg/gen/userpb"
 	plaidgo "github.com/plaid/plaid-go/plaid"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/status"
 )
 
 // Service contains all User-related handlers.
@@ -28,7 +28,7 @@ func (s Service) Get(ctx context.Context, req *userpb.GetRequest) (*userpb.GetRe
 	})
 
 	return &userpb.GetResponse{
-		User: ToUser(out.User),
+		User: db.FromUser(out.User),
 	}, nil
 }
 
@@ -38,25 +38,33 @@ func (s Service) AddItem(ctx context.Context, req *userpb.AddItemRequest) (*user
 		return nil, err
 	}
 
-	res, err := s.client.ExchangePublicToken(req.Token)
+	tokenRes, err := s.client.ExchangePublicToken(req.Token)
 	if err != nil {
 		grpclog.Error(err)
-		return nil, grpc.Errorf(codes.InvalidArgument, "token could not be converted to an access token: %s", err)
+		return nil, status.Errorf(codes.InvalidArgument, "token could not be converted to an access token: %s", err)
 	}
 
-	grpclog.Infof("Exchanged public token (%s) for access token (%s)", req.Token, res.AccessToken)
+	grpclog.Infof("Exchanged public token (%s) for access token (%s)", req.Token, tokenRes.AccessToken)
 	out := s.db.AddItem(&db.AddItemInput{
 		AuthID:           authID,
-		PlaidID:          res.ItemID,
-		PlaidAccessToken: res.AccessToken,
+		PlaidID:          tokenRes.ItemID,
+		PlaidAccessToken: tokenRes.AccessToken,
 	})
 
-	// TODO: Pre-fetch accounts and store account data
+	accountsRes, err := s.client.GetAccounts(tokenRes.AccessToken)
+	if err != nil {
+		grpclog.Error(err)
+		return nil, status.Errorf(codes.InvalidArgument, "unable to fetch Plaid accounts: %s", err)
+	}
+
+	addAccountsRes := s.db.AddAccounts(&db.AddAccountsInput{
+		ItemID:   tokenRes.ItemID,
+		Accounts: db.ToAccounts(accountsRes.Accounts),
+	})
 
 	return &userpb.AddItemResponse{
-		AccessToken: res.AccessToken,
-		ItemId:      res.ItemID,
-		New:         out.IsNew,
+		New:  out.IsNew,
+		User: db.FromUser(addAccountsRes.User),
 	}, nil
 }
 
@@ -75,7 +83,7 @@ func (s Service) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.L
 
 	return &userpb.LoginResponse{
 		New:  resp.IsNew,
-		User: ToUser(resp.User),
+		User: db.FromUser(resp.User),
 	}, nil
 }
 
@@ -88,7 +96,7 @@ type ServiceConfig struct {
 // Validate implementation of proto interface.
 var _ userpb.UserServiceServer = &Service{}
 
-// New returns a new instance of a Plaid service client.
+// New returns a new instance of a User service client.
 func New(c *ServiceConfig) *Service {
 	return &Service{
 		db:     c.Database,
@@ -105,7 +113,7 @@ func New(c *ServiceConfig) *Service {
 //	res, err := s.client.GetTransactions(accessToken, startDate, endDate)
 //	if err != nil {
 //		grpclog.Error(err)
-//		return nil, grpc.Errorf(codes.NotFound, "could not fetch transactions")
+//		return nil, status.Errorf(codes.NotFound, "could not fetch transactions")
 //	}
 //
 //	var transactions []*plaidpb.Transaction

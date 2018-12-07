@@ -6,6 +6,7 @@ type Database interface {
 	GetUser(input *GetUserInput) *GetUserOutput
 	UpsertUser(input *UpsertUserInput) *UpsertUserOutput
 	AddItem(input *AddItemInput) *AddItemOutput
+	AddAccounts(input *AddAccountsInput) *AddAccountsOutput
 }
 
 type UpsertUserInput struct {
@@ -35,5 +36,14 @@ type GetUserInput struct {
 }
 
 type GetUserOutput struct {
+	User *User
+}
+
+type AddAccountsInput struct {
+	ItemID   string
+	Accounts []Account
+}
+
+type AddAccountsOutput struct {
 	User *User
 }

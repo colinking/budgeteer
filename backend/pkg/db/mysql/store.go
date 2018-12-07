@@ -19,6 +19,44 @@ type Database struct {
 	db *gorm.DB
 }
 
+func (d *Database) AddAccounts(input *db.AddAccountsInput) *db.AddAccountsOutput {
+	tx := d.db.Begin()
+
+	item := getItem(input.ItemID, tx)
+
+	// If the item doesn't exist, return a nil user.
+	if item == nil {
+		tx.Rollback()
+		return &db.AddAccountsOutput{}
+	}
+
+	// Update the item with the new accounts.
+	item.Accounts = append(item.Accounts, input.Accounts...)
+	tx.Save(item)
+
+	// Get the updated user.
+	user := getUser(item.UserAuthID, tx)
+
+	tx.Commit()
+
+	return &db.AddAccountsOutput{
+		User: user,
+	}
+}
+
+func getItem(id string, database *gorm.DB) *db.Item {
+	item := &db.Item{
+		PlaidId: id,
+	}
+	database.Set("gorm:auto_preload", true).First(item)
+
+	if item.CreatedAt.IsZero() {
+		return nil
+	}
+
+	return item
+}
+
 func (d *Database) AddItem(input *db.AddItemInput) *db.AddItemOutput {
 	tx := d.db.Begin()
 
@@ -71,19 +109,24 @@ func (d *Database) UpsertUser(input *db.UpsertUserInput) *db.UpsertUserOutput {
 	}
 }
 
-func (d *Database) GetUser(input *db.GetUserInput) *db.GetUserOutput {
+func getUser(id string, database *gorm.DB) *db.User {
 	user := &db.User{
-		AuthID: input.ID,
+		AuthID: id,
 	}
 
-	d.db.Preload("Items").First(&user)
+	database.Set("gorm:auto_preload", true).First(user)
 
-	out := &db.GetUserOutput{}
-	if !user.CreatedAt.IsZero() {
-		out.User = user
+	if user.CreatedAt.IsZero() {
+		return nil
 	}
 
-	return out
+	return user
+}
+
+func (d *Database) GetUser(input *db.GetUserInput) *db.GetUserOutput {
+	return &db.GetUserOutput{
+		User: getUser(input.ID, d.db),
+	}
 }
 
 // New initializes a new DynamoDB database connection.

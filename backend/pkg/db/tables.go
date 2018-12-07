@@ -35,7 +35,35 @@ type User struct {
 type Item struct {
 	Times
 
+	// Metadata
 	PlaidId          string `gorm:"not null;unique;primary_key"`
 	PlaidAccessToken string `gorm:"not null;unique"`
-	UserAuthID       string
+
+	// Accounts
+	Accounts []Account
+
+	// Foreign Keys
+	UserAuthID string
+}
+
+// Account stores metadata about a Plaid Account.
+type Account struct {
+	Times
+
+	// Metadata
+	PlaidId      string `gorm:"not null;unique;primary_key"`
+	Mask         string
+	Name         string
+	OfficialName string
+	Subtype      string
+	Type         string
+
+	// Balance
+	AvailableBalance float64
+	CurrentBalance   float64
+	Limit            float64
+	ISOCurrencyCode  string
+
+	// Foreign Keys
+	ItemPlaidID string
 }
