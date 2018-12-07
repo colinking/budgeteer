@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/colinking/budgeteer/backend/pkg/db"
@@ -17,6 +18,7 @@ func setup(t *testing.T) *Database {
 		t.Fatalf("failed to boot gorm: %s", err)
 	}
 
+	// Clear previous table (if run against on-disk sqlite)
 	d.DropTableIfExists("users")
 	d.DropTableIfExists("items")
 
@@ -27,6 +29,19 @@ func setup(t *testing.T) *Database {
 		AuthID: "1",
 		Name:   "Colin King",
 		Email:  "me@colinking.co",
+		Items: []db.Item{
+			{
+				PlaidId:          "plaid-id-1",
+				PlaidAccessToken: "plaid-token-1",
+			},
+		},
+	}
+	d.Save(user)
+
+	user = &db.User{
+		AuthID: "10",
+		Name:   "John Doe",
+		Email:  "john@example.com",
 	}
 	d.Save(user)
 
@@ -35,27 +50,54 @@ func setup(t *testing.T) *Database {
 	}
 }
 
+func TestGetUser(t *testing.T) {
+	d := setup(t)
+	defer d.db.Close()
+
+	user := d.GetUser(&db.GetUserInput{
+		ID: "1",
+	})
+	require.NotNil(t, user)
+	require.NotNil(t, user.User)
+	require.Equal(t, "1", user.User.AuthID)
+	require.Equal(t, "me@colinking.co", user.User.Email)
+	require.Len(t, user.User.Items, 1)
+}
+
+func TestGetUserNonExistent(t *testing.T) {
+	d := setup(t)
+	defer d.db.Close()
+
+	user := d.GetUser(&db.GetUserInput{
+		ID: "non-existent",
+	})
+	require.NotNil(t, user)
+	require.Nil(t, user.User)
+}
+
 func TestAddItem(t *testing.T) {
 	d := setup(t)
 	defer d.db.Close()
 
+	user := d.GetUser(&db.GetUserInput{
+		ID: "1",
+	})
+	require.Len(t, user.User.Items, 1)
+	require.Equal(t, "plaid-id-1", user.User.Items[0].PlaidId)
+
 	out := d.AddItem(&db.AddItemInput{
 		AuthID:           "1",
-		PlaidID:          "id-1",
-		PlaidAccessToken: "token-1",
+		PlaidID:          "plaid-id-2",
+		PlaidAccessToken: "plaid-token-2",
 	})
-	if out.IsNew != true {
-		t.Fatalf("new item is not unique")
-	}
+	require.Equal(t, true, out.IsNew)
 
-	user := d.GetUserByID("1")
-	if len(user.Items) != 1 {
-		t.Fatalf("user not updated with new item")
-	}
-
-	if user.Items[0].PlaidId != "id-1" {
-		t.Fatalf("user not updated with correct item")
-	}
+	user = d.GetUser(&db.GetUserInput{
+		ID: "1",
+	})
+	require.Len(t, user.User.Items, 2)
+	require.Equal(t, "plaid-id-1", user.User.Items[0].PlaidId)
+	require.Equal(t, "plaid-id-2", user.User.Items[1].PlaidId)
 }
 
 func TestUpsertUser(t *testing.T) {
@@ -67,28 +109,12 @@ func TestUpsertUser(t *testing.T) {
 		Name:   "Kyle King",
 		Email:  "kyle@king.co",
 	}
-
-	if d.UpsertUser(newUser).IsNew != true {
-		t.Fatalf("new user should be unique")
-	}
+	require.Equal(t, true, d.UpsertUser(newUser).IsNew)
 
 	updatedUser := &db.UpsertUserInput{
 		AuthID: "2",
 		Name:   "Kyle King",
 		Email:  "new@email.com",
 	}
-
-	if d.UpsertUser(updatedUser).IsNew != false {
-		t.Fatalf("updated user should not be unique")
-	}
-
-	otherUser := &db.UpsertUserInput{
-		AuthID: "3",
-		Name:   "John Doe",
-		Email:  "john@email.com",
-	}
-
-	if d.UpsertUser(otherUser).IsNew != true {
-		t.Fatalf("other u ser should be unique")
-	}
+	require.Equal(t, false, d.UpsertUser(updatedUser).IsNew)
 }

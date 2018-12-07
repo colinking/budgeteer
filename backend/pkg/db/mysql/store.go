@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"fmt"
-
 	"github.com/colinking/budgeteer/backend/pkg/db"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -68,17 +67,23 @@ func (d *Database) UpsertUser(input *db.UpsertUserInput) *db.UpsertUserOutput {
 
 	return &db.UpsertUserOutput{
 		IsNew: isNew,
+		User:  user,
 	}
 }
 
-func (d *Database) GetUserByID(authID string) *db.User {
+func (d *Database) GetUser(input *db.GetUserInput) *db.GetUserOutput {
 	user := &db.User{
-		AuthID: authID,
+		AuthID: input.ID,
 	}
 
 	d.db.Preload("Items").First(&user)
 
-	return user
+	out := &db.GetUserOutput{}
+	if !user.CreatedAt.IsZero() {
+		out.User = user
+	}
+
+	return out
 }
 
 // New initializes a new DynamoDB database connection.

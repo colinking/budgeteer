@@ -21,17 +21,27 @@ service UserService {
             body: "*"
         };
     }
+
+    rpc Get(GetRequest) returns (GetResponse) {
+        option (google.api.http) = {
+            post: "/v1/user/get"
+            body: "*"
+        };
+    }
 }
 
 // Login
 
 message LoginRequest {
-    User user = 1;
+    string name = 1;
+    string email = 2;
+    string pictureURL = 3;
 }
 
 message LoginResponse {
     // Whether or not this is a new user.
     bool new = 1;
+    User user = 2;
 }
 
 // AddItem
@@ -46,6 +56,14 @@ message AddItemResponse {
     bool new = 3;
 }
 
+// Get
+
+message GetRequest {}
+
+message GetResponse {
+    User user = 1;
+}
+
 // General Types
 
 message User {
@@ -53,4 +71,11 @@ message User {
     string name = 2;
     string email = 3;
     string pictureURL = 4;
+
+    repeated Item items = 5;
+}
+
+message Item {
+    string id = 1;
+    string access_token = 2;
 }

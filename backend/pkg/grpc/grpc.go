@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/colinking/budgeteer/backend/pkg/auth"
 	"github.com/colinking/budgeteer/backend/pkg/db"
@@ -14,7 +15,6 @@ import (
 	"github.com/colinking/budgeteer/backend/pkg/plaid"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/jwtauth"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -40,6 +40,11 @@ type Config struct {
 	PlaidSecret    string `required:"true" split_words:"true"`
 	PlaidEnv       string `default:"sandbox" required:"false" split_words:"true"`
 }
+
+var (
+	authKey       interface{}
+	wrappedServer *grpcweb.WrappedGrpcServer
+)
 
 // registerEndpoints registers all API endpoints for a given gRPC server.
 func registerEndpoints(server *grpc.Server, c Config, db db.Database) {
@@ -72,53 +77,25 @@ func Run(c Config) error {
 	reflection.Register(grpcServer)
 
 	// Wrap the grpc-web HTTP wrapper around the gRPC server
-	wrappedServer := grpcweb.WrapServer(grpcServer)
-	grpcMiddleware := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-			grpclog.Infof("Received request with C-T: %s\n", req.Header.Get("content-type"))
-			if wrappedServer.IsAcceptableGrpcCorsRequest(req) {
-				grpclog.Infof("Incoming grpc cors-preflight request")
-				wrappedServer.ServeHTTP(resp, req)
-			} else if wrappedServer.IsGrpcWebRequest(req) || isGatewayGrpcRequest(req) {
-				grpclog.Infof("Incoming grpc request")
-				wrappedServer.ServeHTTP(resp, req)
-			} else {
-				grpclog.Infof("Incoming non-grpc request")
-				next.ServeHTTP(resp, req)
-			}
-		})
-	}
+	wrappedServer = grpcweb.WrapServer(grpcServer)
 
 	// Load our Auth0 public key to validate requests.
 	jwks := auth.New()
-	key, err := jwks.GetFirstValidationKey()
+	authKey, err = jwks.GetFirstValidationKey()
 	if err != nil {
 		return err
-	}
-
-	// Add middleware to validate that all gRPC requests are authorized with Auth0.
-	validationMiddle := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-			// TODO: rework ordering to require all endpoints beyond a certain point to
-			// be authenticated
-			if wrappedServer.IsGrpcWebRequest(req) || isGatewayGrpcRequest(req) {
-				// Perform auth validation only on gRPC requests.
-				// TODO: perform extra validation on the iss/aud/exp fields.
-				verifier := jwtauth.Verifier(jwtauth.New("RS256", nil, key))
-				verifier(jwtauth.Authenticator(next)).ServeHTTP(resp, req)
-			} else {
-				next.ServeHTTP(resp, req)
-			}
-		})
 	}
 
 	// Setup router middleware
 	r := chi.NewRouter()
 	r.Use(
+		middleware.RequestID,
+		middleware.RealIP,
 		middleware.Logger,
 		middleware.Recoverer,
 		middleware.Heartbeat("/healthz"),
-		validationMiddle,
+		middleware.Timeout(10*time.Second),
+		validationMiddleware,
 		grpcMiddleware,
 	)
 

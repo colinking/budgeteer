@@ -17,8 +17,22 @@ type Service struct {
 	client *plaidgo.Client
 }
 
+func (s Service) Get(ctx context.Context, req *userpb.GetRequest) (*userpb.GetResponse, error) {
+	authID, err := auth.GetAuthId(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	out := s.db.GetUser(&db.GetUserInput{
+		ID: authID,
+	})
+
+	return &userpb.GetResponse{
+		User: ToUser(out.User),
+	}, nil
+}
+
 func (s Service) AddItem(ctx context.Context, req *userpb.AddItemRequest) (*userpb.AddItemResponse, error) {
-	// TODO: move out to auth-ed middleware
 	authID, err := auth.GetAuthId(ctx)
 	if err != nil {
 		return nil, err
@@ -27,7 +41,7 @@ func (s Service) AddItem(ctx context.Context, req *userpb.AddItemRequest) (*user
 	res, err := s.client.ExchangePublicToken(req.Token)
 	if err != nil {
 		grpclog.Error(err)
-		return nil, grpc.Errorf(codes.InvalidArgument, "token could not be converted to an access token")
+		return nil, grpc.Errorf(codes.InvalidArgument, "token could not be converted to an access token: %s", err)
 	}
 
 	grpclog.Infof("Exchanged public token (%s) for access token (%s)", req.Token, res.AccessToken)
@@ -37,6 +51,8 @@ func (s Service) AddItem(ctx context.Context, req *userpb.AddItemRequest) (*user
 		PlaidAccessToken: res.AccessToken,
 	})
 
+	// TODO: Pre-fetch accounts and store account data
+
 	return &userpb.AddItemResponse{
 		AccessToken: res.AccessToken,
 		ItemId:      res.ItemID,
@@ -45,23 +61,21 @@ func (s Service) AddItem(ctx context.Context, req *userpb.AddItemRequest) (*user
 }
 
 func (s Service) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.LoginResponse, error) {
-	// TODO: move out to auth-ed middleware
 	authID, err := auth.GetAuthId(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	grpclog.Infof("Received request from: %s\n", authID)
-
 	resp := s.db.UpsertUser(&db.UpsertUserInput{
 		AuthID:     authID,
-		Name:       req.User.Name,
-		PictureURL: req.User.PictureURL,
-		Email:      req.User.Email,
+		Name:       req.Name,
+		PictureURL: req.PictureURL,
+		Email:      req.Email,
 	})
 
 	return &userpb.LoginResponse{
-		New: resp.IsNew,
+		New:  resp.IsNew,
+		User: ToUser(resp.User),
 	}, nil
 }
 

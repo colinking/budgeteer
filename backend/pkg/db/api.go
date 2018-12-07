@@ -1,5 +1,13 @@
 package db
 
+// Database stores a DB connection.
+type Database interface {
+	// User API
+	GetUser(input *GetUserInput) *GetUserOutput
+	UpsertUser(input *UpsertUserInput) *UpsertUserOutput
+	AddItem(input *AddItemInput) *AddItemOutput
+}
+
 type UpsertUserInput struct {
 	AuthID     string
 	Name       string
@@ -9,6 +17,7 @@ type UpsertUserInput struct {
 
 type UpsertUserOutput struct {
 	IsNew bool
+	User  *User
 }
 
 type AddItemInput struct {
@@ -21,11 +30,10 @@ type AddItemOutput struct {
 	IsNew bool
 }
 
-// Database stores a DB connection.
-type Database interface {
-	// User API
-	GetUserByID(authID string) *User
-	UpsertUser(input *UpsertUserInput) *UpsertUserOutput
+type GetUserInput struct {
+	ID string
+}
 
-	AddItem(input *AddItemInput) *AddItemOutput
+type GetUserOutput struct {
+	User *User
 }

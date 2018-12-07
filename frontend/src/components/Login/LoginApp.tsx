@@ -64,12 +64,10 @@ class LoginApp extends React.Component<RouteComponentProps<any>, LoginState> {
   protected async registerNewUser() {
     const u = await getLoggedInUser()
 
-    const user = new User()
-    user.setName(u.name)
-    user.setEmail(u.email)
-    user.setPictureurl(u.picture)
     const req = new LoginRequest()
-    req.setUser(user)
+    req.setName(u.name)
+    req.setEmail(u.email)
+    req.setPictureurl(u.picture)
 
     clients.users.login(req, getMetadata(), (err, res) => {
       if (err) {

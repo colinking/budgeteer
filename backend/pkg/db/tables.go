@@ -2,8 +2,6 @@ package db
 
 import (
 	"time"
-
-	"github.com/jinzhu/gorm"
 )
 
 //
@@ -11,8 +9,7 @@ import (
 //
 
 // Override gorm.Model to remove the `primary_key` tag
-type GormModelCustomPrimaryKey struct {
-	ID        uint
+type Times struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
@@ -20,7 +17,7 @@ type GormModelCustomPrimaryKey struct {
 
 // User stores metadata about one user account.
 type User struct {
-	GormModelCustomPrimaryKey
+	Times
 
 	// Auth0
 	AuthID string `gorm:"not null;unique;primary_key"`
@@ -36,8 +33,9 @@ type User struct {
 
 // Item stores metadata about a Plaid Item.
 type Item struct {
-	gorm.Model
-	PlaidId          string `gorm:"not null"`
-	PlaidAccessToken string `gorm:"not null"`
+	Times
+
+	PlaidId          string `gorm:"not null;unique;primary_key"`
+	PlaidAccessToken string `gorm:"not null;unique"`
 	UserAuthID       string
 }
