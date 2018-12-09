@@ -24,7 +24,7 @@ type Config struct {
 
 // registerHTTPEndpoints returns a new gateway server which translates HTTP into gRPC.
 func registerHTTPEndpoints(ctx context.Context, conn *grpc.ClientConn) (http.Handler, error) {
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{EmitDefaults: true}))
 
 	for _, f := range []func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error{
 		userpb.RegisterUserServiceHandler,
