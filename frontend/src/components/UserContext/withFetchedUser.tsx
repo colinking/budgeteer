@@ -1,11 +1,17 @@
 import * as React from 'react'
-import { getLoggedInUser, isAuthenticated, User } from '../../lib/auth'
+import { getLoggedInUser, isAuthenticated } from '../../lib/auth'
+import { User } from '../../clients'
 
 export declare interface WithFetchedUserState {
   user?: User
 }
 
-export default function withFetchedUser<P extends WithFetchedUserState>(
+export declare interface WithFetchedUserProps {
+  user?: User
+  refetchUser: () => void
+}
+
+export default function withFetchedUser<P extends WithFetchedUserProps>(
   Component: React.ComponentType<P>
 ) {
   return class WithFetchedUser extends React.Component<
@@ -28,14 +34,14 @@ export default function withFetchedUser<P extends WithFetchedUserState>(
     }
 
     public render() {
-      return <Component {...this.props} user={this.state.user} />
+      return <Component {...this.props} user={this.state.user} refetchUser={this.checkForLogin} />
     }
 
     protected handleLogin = async () => {
       this.checkForLogin()
     }
 
-    protected async checkForLogin() {
+    protected checkForLogin = async () => {
       if (isAuthenticated()) {
         const user = await getLoggedInUser()
         this.setState({ user })

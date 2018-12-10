@@ -3,14 +3,11 @@ import * as React from 'react'
 import { majorScale, minorScale, Pane, Text } from 'evergreen-ui'
 import { RouteComponentProps, withRouter } from 'react-router-dom'
 
-import withUser from '../../hoc/withUser'
-import { User } from '../../lib/auth'
+import withUser, { UserProviderProps } from '../withUser'
 import AvatarMenu from './AvatarMenu'
 import TabbedSubNav, { TabItem } from './TabbedSubNav/TabbedSubNav'
 
-export declare interface NavBarProps extends RouteComponentProps<any> {
-  user?: User
-}
+export declare interface NavBarProps extends RouteComponentProps<any>, UserProviderProps {}
 
 class NavBar extends React.Component<NavBarProps> {
   public render() {
@@ -69,5 +66,4 @@ class NavBar extends React.Component<NavBarProps> {
   }
 }
 
-// TODO: why does context not work here?
 export default withUser(withRouter(NavBar))

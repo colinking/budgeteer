@@ -1,5 +1,5 @@
 import { grpc } from 'grpc-web-client'
-import { getAccessToken, isAuthenticated } from './auth'
+import { getAccessToken, isAuthenticated } from '../../lib/auth'
 
 const port = process.env.PORT || 9091
 

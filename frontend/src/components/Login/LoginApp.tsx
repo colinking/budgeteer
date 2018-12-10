@@ -1,15 +1,13 @@
 import { Location } from 'history'
 import * as React from 'react'
 import { RouteComponentProps, withRouter } from 'react-router-dom'
-import { LoginRequest, User } from '../../gen/userpb/user_service_pb'
 import {
-  getLoggedInUser,
+  getAuth0UserData,
   handleAuthenticationCallback,
   isAuthenticated,
   login
 } from '../../lib/auth'
-import clients from '../../lib/clients'
-import { getMetadata } from '../../lib/requests'
+import { users } from '../../clients'
 import { REDIRECT_KEY } from '../Auth'
 import Error, { WithError } from '../Error'
 import Login from './Login'
@@ -42,7 +40,7 @@ class LoginApp extends React.Component<RouteComponentProps<any>, LoginState> {
     }
 
     if (isAuthenticated()) {
-      await this.registerNewUser()
+      await this.registerUser()
       const redirect = localStorage.getItem(REDIRECT_KEY)
       localStorage.removeItem(REDIRECT_KEY)
 
@@ -61,22 +59,18 @@ class LoginApp extends React.Component<RouteComponentProps<any>, LoginState> {
     return this.state.error ? <Error {...this.state.error!} /> : <Login />
   }
 
-  protected async registerNewUser() {
-    const u = await getLoggedInUser()
+  protected registerUser = async () => {
+    const u = await getAuth0UserData()
 
-    const req = new LoginRequest()
-    req.setName(u.name)
-    req.setEmail(u.email)
-    req.setPictureurl(u.picture)
-
-    clients.users.login(req, getMetadata(), (err, res) => {
-      if (err) {
-        console.error(err)
-        throw err
+    const resp = await users.login(req => {
+      req.setName(u.name)
+      if (u.email) {
+        req.setEmail(u.email)
       }
-
-      console.log(`Registered user. Are they new? ${res!.getNew()}`)
+      req.setPictureurl(u.picture)
     })
+
+    console.log(`Registered user. Are they new? ${resp.getNew()}`)
   }
 }
 

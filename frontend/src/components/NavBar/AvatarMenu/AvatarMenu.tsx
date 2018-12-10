@@ -1,6 +1,6 @@
 import { Popover, Avatar, Pane, majorScale, minorScale, Icon } from 'evergreen-ui'
 import * as React from 'react'
-import { User } from '../../../lib/auth'
+import { User } from '../../../clients'
 import Menu from './Menu'
 
 declare interface AvatarMenuProps {
@@ -12,7 +12,7 @@ export default class AvatarMenu extends React.Component<AvatarMenuProps> {
     const props = this.props
     const avatarProps = {
       name: props.user.name,
-      src: props.user.picture
+      src: props.user.pictureurl
     }
 
     return (

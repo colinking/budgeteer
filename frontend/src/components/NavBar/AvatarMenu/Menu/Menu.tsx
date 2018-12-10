@@ -1,7 +1,7 @@
 import { Heading, majorScale, Menu as EvergreenMenu, Pane, Text, defaultTheme } from 'evergreen-ui'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { User } from '../../../../lib/auth'
+import { User } from '../../../../clients'
 
 declare interface MenuProps {
   user: User

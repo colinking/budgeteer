@@ -1,8 +1,9 @@
 import * as React from 'react'
-import { ProviderProps } from './Provider'
+import { UserProviderProps } from './Provider'
 
-const defaultState: ProviderProps = {
-  user: undefined
+const defaultState: UserProviderProps = {
+  user: undefined,
+  refetchUser: () => null
 }
 
 const { Provider, Consumer } = React.createContext(defaultState)

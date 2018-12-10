@@ -1,8 +1,10 @@
-import { Card, Heading, majorScale, Pane } from 'evergreen-ui'
+import { Card, Heading, majorScale, Pane, Button } from 'evergreen-ui'
 import * as React from 'react'
 import PlaidLink from 'react-plaid-link'
+import { User } from '../../clients'
 
 export interface SettingsProps {
+  user: User
   plaidEnv: string
   plaidPublicKey: string
   handleOnLinkExit: (err: Error | undefined) => void
@@ -25,6 +27,9 @@ export default class Settings extends React.Component<SettingsProps> {
         >
           <Pane flexDirection="column">
             <Heading marginBottom={majorScale(2)}>Settings</Heading>
+
+            <Heading>{props.user.name}</Heading>
+            
             <PlaidLink
               clientName="MOSS"
               env={props.plaidEnv}
@@ -32,8 +37,13 @@ export default class Settings extends React.Component<SettingsProps> {
               publicKey={props.plaidPublicKey}
               onExit={props.handleOnLinkExit}
               onSuccess={props.handleOnLinkSuccess}
+              style={{
+                outline: "none",
+                background: "none",
+                border: "none"
+              }}
             >
-              Open Link to connect your bank!
+              <Button appearance="primary">Add Account</Button>
             </PlaidLink>
           </Pane>
         </Card>

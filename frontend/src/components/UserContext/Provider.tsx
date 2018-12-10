@@ -1,14 +1,11 @@
 import * as React from 'react'
 
-import { User } from '../../lib/auth'
 import { Provider } from './context'
-import withFetchedUser from './withFetchedUser'
+import withFetchedUser, { WithFetchedUserProps } from './withFetchedUser'
 
-export declare interface ProviderProps {
-  user?: User
-}
+export declare interface UserProviderProps extends WithFetchedUserProps {}
 
-class UserProvider extends React.Component<ProviderProps> {
+class UserProvider extends React.Component<UserProviderProps> {
   public render() {
     return <Provider value={this.props}>{this.props.children}</Provider>
   }

@@ -1,59 +1,52 @@
 import * as React from 'react'
 
-import clients from '../../lib/clients'
-import { getMetadata } from '../../lib/requests'
+import { users, User, ServiceError } from '../../clients'
 import SettingsComponent from './Settings'
-import { AddItemRequest, AddItemResponse } from '../../gen/userpb/user_service_pb';
-import { ServiceError } from '../../gen/userpb/user_service_pb_service'
+import withUser, { UserProviderProps } from '../withUser'
+import Loader from '../Loader'
 
 const plaidEnv = process.env.REACT_APP_PLAID_ENV as string
 const plaidPublicKey = process.env.REACT_APP_PLAID_PUBLIC_KEY as string
 
-interface SettingsProps {}
+interface SettingsProps extends UserProviderProps {}
 
-export default class Settings extends React.Component<SettingsProps> {
-  public handleOnLinkExit(err: Error | undefined) {
-    console.log('User exited Link.')
+class Settings extends React.Component<SettingsProps> {
+  public handleOnLinkExit = async (err: Error | undefined) => {
     if (err) {
       this.handleLinkError(err)
     }
   }
 
-  public handleLinkError(err: Error | ServiceError) {
+  public handleLinkError = async (err: Error | ServiceError) => {
     console.error(err)
   }
 
-  public handleOnLinkSuccess(token: string, metadata: any) {
-    console.log('Successfully authenticated user:')
-    console.log(token)
-    console.log(metadata)
-    const req = new AddItemRequest()
-    req.setToken(token)
-    console.log(req)
-    clients.users.addItem(
-      req,
-      getMetadata(),
-      (
-        error: ServiceError | null,
-        resp: AddItemResponse | null
-      ) => {
-        if (error) {
-          throw error
-        }
-        resp = resp as AddItemResponse
-        console.log(resp.getUser())
-      }
-    )
+  public handleOnLinkSuccess = async (token: string, metadata: any) => {
+    await users.addItem(req => {
+      req.setToken(token)  
+    })
+
+    this.props.refetchUser()
   }
 
   public render() {
+    const props = this.props
+    console.log(this.props.user)
+
+    if (!props.user) {
+      return <Loader/>
+    }
+
     return (
       <SettingsComponent
         handleOnLinkExit={this.handleOnLinkExit}
         handleOnLinkSuccess={this.handleOnLinkSuccess}
         plaidEnv={plaidEnv}
         plaidPublicKey={plaidPublicKey}
+        user={props.user}
       />
     )
   }
 }
+
+export default withUser(Settings)

@@ -8,10 +8,10 @@ protoc:
 generate:
   plugins:
     - name: ts
-      output: ../frontend/src/gen
+      output: ../frontend/src/clients/gen
       flags: service=true
       path: ../frontend/node_modules/.bin/protoc-gen-ts
 
     - name: js
-      output:  ../frontend/src/gen
+      output:  ../frontend/src/clients/gen
       flags: import_style=commonjs,binary

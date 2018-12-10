@@ -4,13 +4,7 @@ import auth0, {
   ParseHashOptions
 } from 'auth0-js'
 import * as tp from 'typed-promisify'
-
-export declare interface User {
-  auth_id: string
-  name: string
-  email: string
-  picture: string
-}
+import { users, User } from '../clients'
 
 export const ACCESS_TOKEN_KEY = 'access_token'
 export const ID_TOKEN_KEY = 'id_token'
@@ -93,18 +87,24 @@ export function getAccessToken(): string {
 /**
  * Pulls authentication data from local storage to query Auth for user information.
  */
-export async function getLoggedInUser(): Promise<User> {
+export async function getAuth0UserData(): Promise<auth0.Auth0UserProfile> {
   if (!isAuthenticated()) {
     throw new Error('No logged-in user')
   }
 
   const token = await getAccessToken()
-  const authUser = await userInfo(token)
+  return await userInfo(token)
+}
 
-  return {
-    auth_id: authUser.sub!,
-    email: authUser.email!,
-    name: authUser.name,
-    picture: authUser.picture
+export async function getLoggedInUser(): Promise<User> {
+  if (!isAuthenticated()) {
+    throw new Error('No logged-in user')
   }
+
+  const resp = await users.get().catch(err => {
+    console.error(err)
+    throw err
+  })
+
+  return resp.getUser()!.toObject()
 }
