@@ -19,7 +19,7 @@ export default class Settings extends React.Component<SettingsProps> {
     return (
       <Pane display="flex" justifyContent="center">
         <Card
-          width={majorScale(80)}
+          width={majorScale(90)}
           height="auto"
           elevation={0}
           backgroundColor="white"
@@ -27,7 +27,7 @@ export default class Settings extends React.Component<SettingsProps> {
           padding={majorScale(2)}
         >
           <Pane flexDirection="column">
-            <Heading marginBottom={majorScale(2)}>Account Settings</Heading>
+            <Heading marginBottom={majorScale(2)}>Connected Accounts</Heading>
 
             <AccountList items={props.user.itemsList}/>
             
