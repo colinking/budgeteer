@@ -15,7 +15,7 @@ export default class App extends React.Component<{}> {
   public render() {
     return (
       <AuthOptional>
-        <Pane background="tint1" height="100vh">
+        <Pane background="tint1">
           <NavBar />
 
           <Switch>
