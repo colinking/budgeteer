@@ -1,8 +1,10 @@
 package mysql
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/colinking/budgeteer/backend/pkg/plaid"
+	"github.com/stretchr/testify/require"
 
 	"github.com/colinking/budgeteer/backend/pkg/db"
 	_ "github.com/golang-migrate/migrate/database/sqlite3"
@@ -12,8 +14,12 @@ import (
 )
 
 func setup(t *testing.T) *Database {
+	// Boot an on-disk SQL database for testing.
+	// d, err := gorm.Open("sqlite3", "/tmp/moss.store.test.db")
+
 	// Boot an in-memory SQL database for testing.
 	d, err := gorm.Open("sqlite3", ":memory:")
+
 	if err != nil {
 		t.Fatalf("failed to boot gorm: %s", err)
 	}
@@ -22,10 +28,18 @@ func setup(t *testing.T) *Database {
 	d.DropTableIfExists("users")
 	d.DropTableIfExists("items")
 	d.DropTableIfExists("accounts")
+	d.DropTableIfExists("institutions")
 
 	Migrate(d)
 
 	// Add some sample data.
+	institution := &db.Institution{
+		Name:      "institution-name-1",
+		PlaidID:   "institution-id-1",
+		BrandName: "institution-brand-name-1",
+	}
+	d.Save(institution)
+
 	user := &db.User{
 		AuthID: "1",
 		Name:   "Colin King",
@@ -34,6 +48,7 @@ func setup(t *testing.T) *Database {
 			{
 				PlaidId:          "item-id-1",
 				PlaidAccessToken: "item-token-1",
+				Institution:      *institution,
 				Accounts: []db.Account{
 					{
 						Name:    "account-name-1",
@@ -71,6 +86,7 @@ func TestGetUser(t *testing.T) {
 	require.Len(t, user.User.Items, 1)
 	require.Len(t, user.User.Items[0].Accounts, 1)
 	require.Equal(t, "account-id-1", user.User.Items[0].Accounts[0].PlaidId)
+	require.Equal(t, "institution-brand-name-1", user.User.Items[0].Institution.BrandName)
 }
 
 func TestGetUserNonExistent(t *testing.T) {
@@ -98,6 +114,7 @@ func TestAddItem(t *testing.T) {
 		AuthID:           "1",
 		PlaidID:          "item-id-2",
 		PlaidAccessToken: "item-token-2",
+		InstitutionID:    "institution-id-1",
 	})
 	require.Equal(t, true, out.IsNew)
 
@@ -107,6 +124,7 @@ func TestAddItem(t *testing.T) {
 	require.Len(t, user.User.Items, 2)
 	require.Equal(t, "item-id-1", user.User.Items[0].PlaidId)
 	require.Equal(t, "item-id-2", user.User.Items[1].PlaidId)
+	require.Equal(t, "institution-brand-name-1", user.User.Items[1].Institution.BrandName)
 }
 
 func TestUpsertUser(t *testing.T) {
@@ -164,4 +182,20 @@ func TestAddAccounts(t *testing.T) {
 	require.Equal(t, "account-id-1", account1.PlaidId)
 	require.Equal(t, "account-id-2", account2.PlaidId)
 	require.Equal(t, "account-id-3", account3.PlaidId)
+}
+
+func TestAddInstitution(t *testing.T) {
+	d := setup(t)
+	defer d.db.Close()
+
+	institutionOut := d.AddInstitution(&db.AddInstitutionInput{
+		Institution: &plaid.Institution{
+			Name:      "institution-name-2",
+			ID:        "institution-id-2",
+			BrandName: "institution-brand-name-2",
+		},
+	})
+	require.NotNil(t, institutionOut.Institution)
+	require.Equal(t, "institution-name-2", institutionOut.Institution.Name)
+	require.Equal(t, "institution-id-2", institutionOut.Institution.PlaidID)
 }

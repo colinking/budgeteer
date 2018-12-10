@@ -1,5 +1,7 @@
 package db
 
+import "github.com/colinking/budgeteer/backend/pkg/plaid"
+
 // Database stores a DB connection.
 type Database interface {
 	// User API
@@ -7,6 +9,7 @@ type Database interface {
 	UpsertUser(input *UpsertUserInput) *UpsertUserOutput
 	AddItem(input *AddItemInput) *AddItemOutput
 	AddAccounts(input *AddAccountsInput) *AddAccountsOutput
+	AddInstitution(input *AddInstitutionInput) *AddInstitutionOutput
 }
 
 type UpsertUserInput struct {
@@ -25,6 +28,7 @@ type AddItemInput struct {
 	AuthID           string
 	PlaidID          string
 	PlaidAccessToken string
+	InstitutionID    string
 }
 
 type AddItemOutput struct {
@@ -46,4 +50,12 @@ type AddAccountsInput struct {
 
 type AddAccountsOutput struct {
 	User *User
+}
+
+type AddInstitutionInput struct {
+	Institution *plaid.Institution
+}
+
+type AddInstitutionOutput struct {
+	Institution *Institution
 }

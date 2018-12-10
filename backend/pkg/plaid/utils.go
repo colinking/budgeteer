@@ -8,8 +8,8 @@ import (
 	"google.golang.org/grpc/grpclog"
 )
 
-func New(clientID, publicKey, secret, env string) *plaid.Client {
-	client, err := plaid.NewClient(plaid.ClientOptions{
+func New(clientID, publicKey, secret, env string) *Client {
+	plaidClient, err := plaid.NewClient(plaid.ClientOptions{
 		ClientID:    clientID,
 		Secret:      secret,
 		PublicKey:   publicKey,
@@ -20,7 +20,7 @@ func New(clientID, publicKey, secret, env string) *plaid.Client {
 		grpclog.Fatalf("failed to initialize Plaid client: %v", err)
 	}
 
-	return client
+	return NewClient(plaidClient, publicKey)
 }
 
 // toEnvironment converts a string to a Plaid environment.

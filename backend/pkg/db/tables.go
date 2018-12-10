@@ -40,10 +40,12 @@ type Item struct {
 	PlaidAccessToken string `gorm:"not null;unique"`
 
 	// Accounts
-	Accounts []Account
+	Accounts    []Account
+	Institution Institution
 
 	// Foreign Keys
-	UserAuthID string
+	UserAuthID         string `gorm:"not null"`
+	InstitutionPlaidID string `gorm:"not null"`
 }
 
 // Account stores metadata about a Plaid Account.
@@ -66,4 +68,22 @@ type Account struct {
 
 	// Foreign Keys
 	ItemPlaidID string
+}
+
+// Institution stores metadata about a Plaid Institution.
+type Institution struct {
+	Times
+
+	// Metadata
+	PlaidID   string `gorm:"not null;unique;primary_key"`
+	BrandName string
+	Name      string
+	Logo      string `gorm:"type:varchar(4000)"`
+	URL       string
+
+	// Colors
+	ColorDark    string
+	ColorDarker  string
+	ColorLight   string
+	ColorPrimary string
 }

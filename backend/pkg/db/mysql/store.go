@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"fmt"
+
 	"github.com/colinking/budgeteer/backend/pkg/db"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -17,6 +18,42 @@ type Config struct {
 
 type Database struct {
 	db *gorm.DB
+}
+
+func getInstitution(id string, database *gorm.DB) *db.Institution {
+	institution := &db.Institution{
+		PlaidID: id,
+	}
+	database.Set("gorm:auto_preload", true).First(institution)
+
+	if institution.CreatedAt.IsZero() {
+		return nil
+	}
+
+	return institution
+}
+
+func (d *Database) AddInstitution(input *db.AddInstitutionInput) *db.AddInstitutionOutput {
+	tx := d.db.Begin()
+
+	institution := &db.Institution{
+		PlaidID:      input.Institution.ID,
+		Name:         input.Institution.Name,
+		BrandName:    input.Institution.BrandName,
+		ColorDark:    input.Institution.Colors.Dark,
+		ColorDarker:  input.Institution.Colors.Darker,
+		ColorLight:   input.Institution.Colors.Light,
+		ColorPrimary: input.Institution.Colors.Primary,
+		Logo:         input.Institution.Logo,
+		URL:          input.Institution.URL,
+	}
+	tx.Save(institution)
+
+	tx.Commit()
+
+	return &db.AddInstitutionOutput{
+		Institution: institution,
+	}
 }
 
 func (d *Database) AddAccounts(input *db.AddAccountsInput) *db.AddAccountsOutput {
@@ -62,16 +99,14 @@ func (d *Database) AddItem(input *db.AddItemInput) *db.AddItemOutput {
 
 	// Create the new Plaid Item.
 	item := &db.Item{
-		PlaidId:          input.PlaidID,
-		PlaidAccessToken: input.PlaidAccessToken,
+		PlaidId:            input.PlaidID,
+		PlaidAccessToken:   input.PlaidAccessToken,
+		InstitutionPlaidID: input.InstitutionID,
 	}
 	tx.Save(item)
 
 	// Add the Item to the current user.
-	user := &db.User{
-		AuthID: input.AuthID,
-	}
-	tx.First(user)
+	user := getUser(input.AuthID, tx)
 	user.Items = append(user.Items, *item)
 	tx.Save(user)
 

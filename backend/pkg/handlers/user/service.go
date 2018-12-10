@@ -4,7 +4,7 @@ import (
 	"github.com/colinking/budgeteer/backend/pkg/auth"
 	"github.com/colinking/budgeteer/backend/pkg/db"
 	"github.com/colinking/budgeteer/backend/pkg/gen/userpb"
-	plaidgo "github.com/plaid/plaid-go/plaid"
+	"github.com/colinking/budgeteer/backend/pkg/plaid"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
@@ -14,7 +14,7 @@ import (
 // Service contains all User-related handlers.
 type Service struct {
 	db     db.Database
-	client *plaidgo.Client
+	client *plaid.Client
 }
 
 func (s Service) Get(ctx context.Context, req *userpb.GetRequest) (*userpb.GetResponse, error) {
@@ -38,6 +38,7 @@ func (s Service) AddItem(ctx context.Context, req *userpb.AddItemRequest) (*user
 		return nil, err
 	}
 
+	// Exchange this Public Token for Item metadata from Plaid.
 	tokenRes, err := s.client.ExchangePublicToken(req.Token)
 	if err != nil {
 		grpclog.Error(err)
@@ -45,25 +46,42 @@ func (s Service) AddItem(ctx context.Context, req *userpb.AddItemRequest) (*user
 	}
 
 	grpclog.Infof("Exchanged public token (%s) for access token (%s)", req.Token, tokenRes.AccessToken)
-	out := s.db.AddItem(&db.AddItemInput{
-		AuthID:           authID,
-		PlaidID:          tokenRes.ItemID,
-		PlaidAccessToken: tokenRes.AccessToken,
-	})
 
+	// Fetch the Institution for this Item from Plaid.
+	institutionRes, err := s.client.GetInstitutionByIDWithDisplay(req.InstitutionId)
+	if err != nil {
+		grpclog.Error(err)
+		return nil, status.Errorf(codes.InvalidArgument, "institution could not be fetched: %s", err)
+	}
+
+	// Fetch Accounts for this Item from Plaid.
 	accountsRes, err := s.client.GetAccounts(tokenRes.AccessToken)
 	if err != nil {
 		grpclog.Error(err)
 		return nil, status.Errorf(codes.InvalidArgument, "unable to fetch Plaid accounts: %s", err)
 	}
 
+	// Store this Institution.
+	addInstitutionRes := s.db.AddInstitution(&db.AddInstitutionInput{
+		Institution: &institutionRes.Institution,
+	})
+
+	// Store this Item.
+	addItemRes := s.db.AddItem(&db.AddItemInput{
+		AuthID:           authID,
+		PlaidID:          tokenRes.ItemID,
+		PlaidAccessToken: tokenRes.AccessToken,
+		InstitutionID:    addInstitutionRes.Institution.PlaidID,
+	})
+
+	// Store these Accounts.
 	addAccountsRes := s.db.AddAccounts(&db.AddAccountsInput{
 		ItemID:   tokenRes.ItemID,
 		Accounts: db.ToAccounts(accountsRes.Accounts),
 	})
 
 	return &userpb.AddItemResponse{
-		New:  out.IsNew,
+		New:  addItemRes.IsNew,
 		User: db.FromUser(addAccountsRes.User),
 	}, nil
 }
@@ -90,7 +108,7 @@ func (s Service) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.L
 // ServiceConfig specifies the configuration for a new User Service.
 type ServiceConfig struct {
 	Database db.Database
-	Client   *plaidgo.Client
+	Client   *plaid.Client
 }
 
 // Validate implementation of proto interface.

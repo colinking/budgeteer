@@ -11,6 +11,7 @@ func Migrate(d *gorm.DB) {
 		db.User{},
 		db.Item{},
 		db.Account{},
+		db.Institution{},
 	)
 
 	// TODO: move to a better migration tool: https://github.com/go-gormigrate/gormigrate

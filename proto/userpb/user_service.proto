@@ -48,6 +48,7 @@ message LoginResponse {
 
 message AddItemRequest {
     string token = 1;
+    string institution_id = 2;
 }
 
 message AddItemResponse {
@@ -79,6 +80,7 @@ message Item {
     string id = 1;
     string access_token = 2;
     repeated Account accounts = 3;
+    Institution institution = 4;
 }
 
 message Account {
@@ -93,4 +95,16 @@ message Account {
     double currentBalance = 8;
     double limit = 9;
     string currency = 10;
+}
+
+message Institution {
+    string id = 1;
+    string name = 2;
+    string brand_name = 3;
+    string logo = 4;
+    string url = 5;
+    string color_dark = 6;
+    string color_darker = 7;
+    string color_light = 8;
+    string color_primary = 9;
 }

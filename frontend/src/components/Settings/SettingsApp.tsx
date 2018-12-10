@@ -24,6 +24,7 @@ class SettingsApp extends React.Component<SettingsAppProps> {
   public handleOnLinkSuccess = async (token: string, metadata: any) => {
     await users.addItem(req => {
       req.setToken(token)  
+      req.setInstitutionId(metadata.institution.institution_id)
     })
 
     this.props.refetchUser()

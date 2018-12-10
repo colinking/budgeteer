@@ -34,6 +34,9 @@ func ToAccount(plaidAccount *plaid.Account) *Account {
 }
 
 func FromUser(dbUser *User) *userpb.User {
+	if dbUser == nil {
+		return nil
+	}
 	items := make([]*userpb.Item, len(dbUser.Items))
 	for i, item := range dbUser.Items {
 		items[i] = FromItem(&item)
@@ -53,6 +56,7 @@ func FromItem(dbItem *Item) *userpb.Item {
 		Id:          dbItem.PlaidId,
 		AccessToken: dbItem.PlaidAccessToken,
 		Accounts:    FromAccounts(dbItem.Accounts),
+		Institution: FromInstitution(&dbItem.Institution),
 	}
 }
 
@@ -78,5 +82,19 @@ func FromAccount(dbAccount *Account) *userpb.Account {
 		CurrentBalance:   dbAccount.CurrentBalance,
 		Limit:            dbAccount.Limit,
 		Currency:         dbAccount.ISOCurrencyCode,
+	}
+}
+
+func FromInstitution(dbInstitution *Institution) *userpb.Institution {
+	return &userpb.Institution{
+		Id:           dbInstitution.PlaidID,
+		BrandName:    dbInstitution.BrandName,
+		Name:         dbInstitution.Name,
+		Logo:         dbInstitution.Logo,
+		ColorDark:    dbInstitution.ColorDark,
+		ColorDarker:  dbInstitution.ColorDarker,
+		ColorLight:   dbInstitution.ColorLight,
+		ColorPrimary: dbInstitution.ColorPrimary,
+		Url:          dbInstitution.URL,
 	}
 }

@@ -106,5 +106,11 @@ export async function getLoggedInUser(): Promise<User> {
     throw err
   })
 
-  return resp.getUser()!.toObject()
+  const user = resp.getUser()
+
+  if (!user) {
+    throw new Error('Invalid user')
+  }
+
+  return user.toObject()
 }
