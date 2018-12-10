@@ -2,6 +2,7 @@ import { Card, Heading, majorScale, Pane, Button } from 'evergreen-ui'
 import * as React from 'react'
 import PlaidLink from 'react-plaid-link'
 import { User } from '../../clients'
+import AccountList from './AccountList/AccountList'
 
 export interface SettingsProps {
   user: User
@@ -26,25 +27,28 @@ export default class Settings extends React.Component<SettingsProps> {
           padding={majorScale(2)}
         >
           <Pane flexDirection="column">
-            <Heading marginBottom={majorScale(2)}>Settings</Heading>
+            <Heading marginBottom={majorScale(2)}>Account Settings</Heading>
 
-            <Heading>{props.user.name}</Heading>
+            <AccountList items={props.user.itemsList}/>
             
-            <PlaidLink
-              clientName="MOSS"
-              env={props.plaidEnv}
-              product={['transactions']}
-              publicKey={props.plaidPublicKey}
-              onExit={props.handleOnLinkExit}
-              onSuccess={props.handleOnLinkSuccess}
-              style={{
-                outline: "none",
-                background: "none",
-                border: "none"
-              }}
-            >
-              <Button appearance="primary">Add Account</Button>
-            </PlaidLink>
+            <Pane marginTop={majorScale(2)}>
+              <PlaidLink
+                clientName="MOSS"
+                env={props.plaidEnv}
+                product={['transactions']}
+                publicKey={props.plaidPublicKey}
+                onExit={props.handleOnLinkExit}
+                onSuccess={props.handleOnLinkSuccess}
+                style={{
+                  outline: "none",
+                  background: "none",
+                  border: "none",
+                  padding: 0
+                }}
+              >
+                <Button appearance="primary">Add Account</Button>
+              </PlaidLink>
+            </Pane>
           </Pane>
         </Card>
       </Pane>

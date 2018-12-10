@@ -1,5 +1,5 @@
 import { ServiceError } from './gen/userpb/user_service_pb_service'
-import { User } from './gen/userpb/user_service_pb'
+import { User, Item, Account } from './gen/userpb/user_service_pb'
 
 import * as users from './users'
 
@@ -11,3 +11,5 @@ export {
 }
 
 export type User = User.AsObject
+export type Item = Item.AsObject
+export type Account = Account.AsObject
