@@ -41,7 +41,7 @@ class Account extends React.Component<AccountProps> {
     }
 
     return (
-      <Pane display="flex" padding={majorScale(2)} background="tint2" borderRadius={3} marginBottom={majorScale(1)} marginTop={majorScale(1)}>
+      <Pane display="flex" padding={majorScale(2)} background="tint2" borderRadius={3} marginBottom={majorScale(1)} marginTop={majorScale(1)} alignItems="center">
         <Pane flex={1} alignItems="center" display="flex">
           <Tooltip content={institutionAvatarProps.name} position={Position.LEFT}>
             <Avatar size={majorScale(4)} {...institutionAvatarProps} border="1px #333 solid" marginRight={majorScale(2)} />
