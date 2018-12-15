@@ -1,0 +1,19 @@
+version: '3'
+services:
+  moss-db:
+    image: mysql:5.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=moss
+    ports:
+      - "9092:3306"
+  # server:
+    # TODO
+    # links:
+      # db
+  # gateway:
+  #   TODO
+    # links:
+    #   server
+  # app:
+    # TODO

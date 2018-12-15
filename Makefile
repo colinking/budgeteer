@@ -48,8 +48,7 @@ app: build
 
 .PHONY: db
 db:
-	@docker rm moss-db > /dev/null || true
-	@docker run -p ${DB_PORT}:3306 --name moss-db -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=moss mysql:5.6
+	docker-compose up
 
 # Docker connect
 
